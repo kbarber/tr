@@ -1,0 +1,42 @@
+  Might be better (possibly less flexible) to use
+  http://search.cpan.org/~makamaka/JSON-RPC-0.95/lib/JSON/RPC.pm, though
+  need to make sure it doesn't use filters?
+
+
+
+
+Bit rough, but currently
+
+Map path to modules:
+
+/          : TR             { TR->json_action }
+/ldap      : TR::ldap       { TR::ldap->json action }
+/ldap/user : TR::ldap::user { TR::ldap::user->json_action }
+
+
+TR::ldap inherets common stuff like config from TR.
+
+TR::ldap::user inherits all ldap stuff from TR::ldap so common functions
+for ldap live there.
+
+Handler
+  Doc support.
+  Hand off, support CGI and mod_perl so app can be run stand alone.
+  Make as similar to Catalyst as possible so we keep our future options
+  open?
+  People with exposure to catalyst will have less of a
+  learning curve.
+  Have module per content-type, maybe handle input and output by per
+  content modules.
+
+Think about:
+  Auditing/Logging
+  ACLs
+  Hooks/plugins.
+
+Problems:
+  The recursive hand off makes it a bit messy,
+  possibly should automatically load all modules
+  and just map paths -> method on initialisation.
+
+
