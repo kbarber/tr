@@ -3,8 +3,6 @@
   need to make sure it doesn't use filters?
 
 
-
-
 Bit rough, but currently
 
 Map path to modules:
@@ -15,7 +13,6 @@ Map path to modules:
 
 
 TR::ldap inherets common stuff like config from TR.
-
 TR::ldap::user inherits all ldap stuff from TR::ldap so common functions
 for ldap live there.
 
@@ -26,7 +23,7 @@ Handler
   open?
   People with exposure to catalyst will have less of a
   learning curve.
-  Have module per content-type, maybe handle input and output by per
+  Have module per content-type, probaby handle input and output by per
   content modules.
 
 Think about:
@@ -34,9 +31,12 @@ Think about:
   ACLs
   Hooks/plugins.
 
-Problems:
-  The recursive hand off makes it a bit messy,
-  possibly should automatically load all modules
-  and just map paths -> method on initialisation.
+TODO:
+  Move attribute handling out into separate modules, ie
+    LWFW::Attribute::Local
+    LWFW::Attribute::Regex  (implement again)
+    LWFW::Attribute::Params (implement)
 
-
+  Exception handling:
+    Remove ugly "returns" needed for Test::More, more to exceptions and
+    exception testing.

@@ -39,11 +39,15 @@ sub _get_path_to_module {
 
   $module =~ s#::#/#g;
   $module .= '.pm';
-
-  my $path = realpath($INC{$module});
-  $path =~ s/[^\/]+\.pm//;
-
-  return $path;
+  
+  if (defined $INC{$module}) {
+    my $path = realpath($INC{$module});
+    $path =~ s/[^\/]+\.pm//;
+    return $path;
+  }
+  else {
+    warn "Couldn't find path for $module\n";
+  }
 }
 
 =head2 _load_module
