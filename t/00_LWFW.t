@@ -2,8 +2,9 @@
 use strict;
 use warnings;
 use FindBin qw($Bin);
+use CGI;
 
-use lib "$Bin/../engine/lib";
+use lib "$Bin/../lib";
 use lib "$Bin";
 
 use Test::More tests => 3;

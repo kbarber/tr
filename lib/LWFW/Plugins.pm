@@ -4,11 +4,9 @@ use warnings;
 use Cwd qw/realpath/;
 use base 'Class::Accessor::Fast';
 
-our @plugin_dirs = qw/C M V/;
-
 =head2 _load_plugins
 
-  Look for certain directories (C M V) under the current 
+  Look for modules under the current 
   package ref($self) and load any modules found there automatically.
 
 =cut
