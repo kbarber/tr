@@ -16,17 +16,20 @@ $ENV{'CONTENT_TYPE'}   = 'application/json';
 $ENV{'REQUEST_METHOD'} = 'POST';
 $ENV{'SCRIPT_NAME'}    = "/";
 
-my $test_json = '{
-  "jsonrpc":"2.0",
-  "method":"testmethod",
-  "params":{
-    "aparam":"testtext"
-   },
-  "id":1
-}';
+{
+  my $test_json = '{
+    "jsonrpc":"2.0",
+    "method":"testmethod",
+    "params":{
+      "aparam":"testtext"
+    },
+    "id":1
+  }';
 
-$ENV{'CONTENT_LENGTH'} = length($test_json);
-my $cgi = new CGI({POSTDATA => $test_json});
+  $ENV{'CONTENT_LENGTH'} = length($test_json);
+  my $cgi = new CGI({POSTDATA => $test_json});
 
-ok(my $fw = LWFW->new($cgi), 'Can create LWFW object');
-ok($fw->dispatch(), "Can dispatch $ENV{'SCRIPT_NAME'})");
+  ok(my $fw = LWFW->new($cgi), 'Can create LWFW object');
+  ok($fw->dispatch(), "Can dispatch $ENV{'SCRIPT_NAME'})");
+}
+

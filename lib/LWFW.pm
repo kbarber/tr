@@ -67,7 +67,7 @@ sub new {
 sub dispatch {
     my $self = shift;
 
-    my $path = $self->request->url(-absolute => 1);
+    my $path = shift || $self->request->url(-absolute => 1);
     
     my $handlers_by_path = $self->_get_handler_paths;
 
@@ -82,6 +82,8 @@ sub dispatch {
     elsif(not $self->_run_method()) {
       return $self->doc();
     }
+
+    return 1;
 }
 
 =head2 _run_method 
@@ -194,6 +196,7 @@ sub _get_pod {
 
   return;
 }
+
 =head2 _init
 
   Override in modules.
