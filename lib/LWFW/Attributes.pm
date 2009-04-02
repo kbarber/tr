@@ -1,44 +1,27 @@
 package LWFW::Attributes;
 use strict;
 use warnings;
+use Attribute::Handlers;
+
 use base 'Class::Accessor::Fast';
 
-my @handler_types = qw/Local Regex/;
-
-=head2 MODIFY_CODE_ATTRIBUTES
-
-  Handles custom code attributes
-
-=cut
-sub MODIFY_CODE_ATTRIBUTES {
-  my ($package, $code_ref, @attr) = @_;
-  # TODO Allow Attribute::Handler type hooks?
-  foreach my $attr (@attr) {
-    if ($package->can($attr)) {
-    }
-  }
-  
-  push @{$LWFW::attribute_cache{$package}{$code_ref}}, @attr;
-  return ();
+sub UNIVERSAL::Local : ATTR(CODE, BEGIN) {
+  my ($package, $symbol, $referent, $attr, $data) = @_;
+  push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
 }
 
-=head2 MODIFY_CODE_ATTRIBUTES
+sub UNIVERSAL::Regex : ATTR(CODE, BEGIN) {
+  my ($package, $symbol, $referent, $attr, $data) = @_;
+  push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
+}
 
-  Returns array of attributes for a given code ref
-
-=cut
-sub FETCH_CODE_ATTRIBUTES {
-  my ($package, $code_ref) = @_;
-  if (my $attributes = $LWFW::attribute_cache{$package}{$code_ref}) {
-    return @{$attributes};
-  }
-    
-  return ();
+sub UNIVERSAL::Params : ATTR(CODE) {
+  print "Stuff...\n"; 
 }
 
 =head2 _get_handler_paths
 
-  Returns list of handlers registered with attributes in @handler_types
+  Returns list of handlers registered with attributes
 
 =cut
 sub _get_handler_paths {
@@ -80,25 +63,6 @@ sub _get_name_by_code_ref {
       }
     }
   }
-}
-
-=head2 _is_public_method 
-
-  Checks to see if a method is allowed.
-
-=cut
-sub _is_public_method {
-  my $self   = shift;
-  my $method = shift;
-
-  if (my $cv = $self->can($method)) {
-    my @attributes = attributes::get($cv);
-    if (@attributes ~~ /Local/) {
-      return 1;
-    }
-  }
-
-  return;
 }
 
 1;

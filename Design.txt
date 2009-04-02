@@ -27,16 +27,11 @@ Handler
   content modules.
 
 Think about:
-  Auditing/Logging
-  ACLs
-  Hooks/plugins.
+  Auditing/Logging (easy to hook into _run_method)
+  ACLs             (easy to hook into _run_method)
+  Hooks?
 
 TODO:
-  Move attribute handling out into separate modules, ie
-    LWFW::Attribute::Local
-    LWFW::Attribute::Regex  (implement again)
-    LWFW::Attribute::Params (implement)
-
   Exception handling:
     Remove ugly "returns" needed for Test::More, more to exceptions and
     exception testing.

@@ -100,7 +100,7 @@ sub _run_method {
 
   my $method = $self->context->method();
 
-  if ($self->_is_public_method($method)) {
+  if (my $cv = $self->can($method)) {
     $self->$method();    
     return 1;
   }
