@@ -35,7 +35,7 @@ sub _load_plugins {
 =cut
 sub _get_path_to_module {
   my $self   = shift;
-  my $module = shift || ref($self);
+  my $module = shift || ref($self) || $self;
 
   $module =~ s#::#/#g;
   $module .= '.pm';

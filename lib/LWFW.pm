@@ -3,8 +3,10 @@ use strict;
 use warnings;
 use attributes;
 use feature ":5.10";
-use CGI;
-use PPI;
+use mro;
+
+use CGI();
+use PPI();
 
 use base qw/LWFW::Attributes LWFW::Plugins/;
 __PACKAGE__->mk_ro_accessors(qw/request context/);
@@ -37,6 +39,7 @@ sub new {
              }, $class;
 
   $self->_load_plugins();
+  $self->_init();
 
   # Have different handlers per content-type?
   my $content_type = $self->request->content_type();
@@ -191,20 +194,14 @@ sub _get_pod {
 
   return;
 }
-
-=head2 get_pod
- 
-  gets pod for a function
-
-=cut
-
-
 =head2 _init
- 
-  Override in modules for extra setup needed, ie ldap connection etc.
+
+  Override in modules.
 
 =cut
 sub _init {
+  my $self = shift;
+  $self->maybe::next::method(@_);
 }
 
 1;
