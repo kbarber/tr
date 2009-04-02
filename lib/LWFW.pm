@@ -4,6 +4,7 @@ use warnings;
 use attributes;
 use feature ":5.10";
 use CGI;
+use PPI;
 
 use base qw/LWFW::Attributes LWFW::Plugins/;
 __PACKAGE__->mk_ro_accessors(qw/request context/);
@@ -100,20 +101,82 @@ sub dispatch {
 =cut
 sub doc : Regex('/doc$') {
   my $self = shift;
+  my $method = '';
 
-  print "\n---------------My Supported Methods---------------\n";
+  print "\n---------------My Supported Methods---------------";
   my $handlers = $self->_get_handler_paths();
   foreach my $path (keys %{$handlers}) {
     my $methods = $handlers->{$path}{'methods'};
+    my $package = $handlers->{$path}{'package'};
     if ($path eq '') {
       $path = 'GLOBAL';
     }
     print "\n$path\n";
     foreach my $method (@{$methods}) {
       print "\t$method\n";
+      if (my $poddoc = $self->_get_pod(package => $package,
+                                       method => $method)) {
+        print "\t\t$poddoc\n";
+      }
     }
   }
   print "---------------------------------------------------\n";
+  return;
+}
+
+=head2 _get_pod
+ 
+  Grabs pod documentation for a given package/method.
+  Need to standardise on format so that it can be passed back
+  to a caller,
+  and that caller be able to present it any way it wants.
+
+  ie maybe pod like this:
+
+  head2 asub
+
+    Description:
+      blah
+
+    Example:
+      blah
+
+  cut
+
+  Could be returned as:
+
+  {
+    method      => asub,
+    params      => [a, b, c,],  # (From params attribute)
+    description => 'blah',
+    example     => 'blah',
+  }
+
+=cut
+sub _get_pod {
+  my ($self, %args) = @_;
+
+  return unless $args{'package'};
+  return unless $args{'method'};
+
+  my $module_dir = $self->_get_path_to_module($args{'package'});
+
+  if ($args{'package'} =~ /::([^:]+)$/) {
+    my $document = PPI::Document->new($module_dir . $1 . '.pm') or return;
+    if (my $results = $document->find(sub {
+                                   $_[1]->isa('PPI::Token::Pod')
+                                   and ($_[1]->content =~ /=head2 $args{'method'}/) 
+                                 })) {
+      my $content = @$results[0]->content();
+      $content =~ s/=head2 $args{'method'}//m;
+      $content =~ s/=cut//m;
+      $content =~ s/\n//gm;
+      $content =~ s/\s{2}/ /gm;
+      return $content;
+    }
+  }
+
+  return;
 }
 
 =head2 get_pod
