@@ -28,4 +28,4 @@ $ENV{'CONTENT_LENGTH'} = length($test_json);
 my $cgi = new CGI({POSTDATA => $test_json});
 
 ok(my $fw = LWFW->new($cgi), 'Can create LWFW object');
-ok($fw->dispatch('/'), 'Can dispatch /');
+ok($fw->dispatch(), "Can dispatch $ENV{');
