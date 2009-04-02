@@ -64,12 +64,8 @@ sub new {
 sub dispatch {
     my $self = shift;
 
-    my $path = shift || $self->request->url(-absolute => 1);
+    my $path = $self->request->url(-absolute => 1);
     
-    if ((not defined $path) or ($path eq '')) {
-      $path = '/';
-    }
- 
     my $handlers_by_path = $self->_get_handler_paths;
 
     if (my $handler = $handlers_by_path->{$path}) {
@@ -77,21 +73,37 @@ sub dispatch {
      
       my $new_module = bless $self, $handler_module;
       $new_module->_init();
-      return $new_module->dispatch('/');
+      return $new_module->_run_method();
 
     }
-    elsif(my $method = $self->context->method()) {
-      if ($self->_is_public_method($method)) {
-        return $self->$method();    
-      }
-      else {
-        warn "Don't know how to handle $method\n"; 
-      }
+    elsif(not $self->_run_method()) {
+      return $self->doc();
     }
+}
 
-    $self->doc();
- 
+=head2 _run_method 
+
+  Called to run a method on the current object.
+
+  Checks that it is a public method.
+
+  Maybe ACL/Audit hooks later.
+
+=cut
+sub _run_method {
+  my $self   = shift;
+
+  my $method = $self->context->method();
+
+  if ($self->_is_public_method($method)) {
+    $self->$method();    
     return 1;
+  }
+  else {
+    warn "Don't know how to handle $method\n"; 
+  }
+
+  return;
 }
 
 =head2 doc
@@ -121,7 +133,8 @@ sub doc : Regex('/doc$') {
     }
   }
   print "---------------------------------------------------\n";
-  return;
+
+  return 1;
 }
 
 =head2 _get_pod
