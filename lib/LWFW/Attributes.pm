@@ -36,20 +36,30 @@ sub FETCH_CODE_ATTRIBUTES {
   return ();
 }
 
-=head2 _get_handler_list
+=head2 _get_handler_paths
 
   Returns list of handlers registered with attributes in @handler_types
 
 =cut
-sub _get_handler_list {
-  my %handlers;
+sub _get_handler_paths {
+  my %handlers = ();
 
   foreach my $package  (keys %LWFW::attribute_cache) {
     foreach my $code_ref (keys %{$LWFW::attribute_cache{$package}}) {
       my $method_name = _get_name_by_code_ref($package, $code_ref);
-      print $package . '::' . $method_name . "\n";
+
+      # generate a path from package/method
+      my $path = lc($package);
+      $path =~ s#::#/#g;
+      $path =~ s#^[^/]+##; # Remove base package name
+
+      # Store package and method details
+      $handlers{$path}{'package'} = $package;
+      push @{$handlers{$path}{'methods'}}, lc($method_name);
     }
   }
+
+  return \%handlers;
 }
 
 =head2 _get_name_by_code_ref

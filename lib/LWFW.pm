@@ -62,26 +62,22 @@ sub new {
 =cut
 sub dispatch {
     my $self = shift;
-    my $path = shift;
+
+    my $path = shift || $self->request->url(-absolute => 1);
     
     if ((not defined $path) or ($path eq '')) {
       $path = '/';
     }
  
-    if ($path =~ s#(/[^/]+)##) {
-      # work out the module to pass request onto.
-      my $new_module = lc($1);
-      $new_module =~ s#/#::#;
-      $new_module = ref($self) . $new_module;
-      
-      my $new_handler;
-      eval("\$new_handler = new $new_module(\$self->request())");
-      if ($@) {
-        warn "Unable to handle request $@\n";
-      }
-      if ($new_handler) {
-        return $new_handler->dispatch($path);
-      }
+    my $handlers_by_path = $self->_get_handler_paths;
+
+    if (my $handler = $handlers_by_path->{$path}) {
+      my $handler_module = $handler->{'package'};
+     
+      my $new_module = bless $self, $handler_module;
+      $new_module->_init();
+      return $new_module->dispatch('/');
+
     }
     elsif(my $method = $self->context->method()) {
       if ($self->_is_public_method($method)) {
@@ -91,10 +87,8 @@ sub dispatch {
         warn "Don't know how to handle $method\n"; 
       }
     }
-    else {
-      warn "Docs.....\n";
-      $self->doc();
-    }
+
+    $self->doc();
  
     return 1;
 }
@@ -105,9 +99,21 @@ sub dispatch {
 
 =cut
 sub doc : Regex('/doc$') {
-  print "\n---------------MY LIST OF FUNCTIONS---------------\n";
-  LWFW::Attributes->_get_handler_list();
-  print "--------------------------------------------------\n";
+  my $self = shift;
+
+  print "\n---------------My Supported Methods---------------\n";
+  my $handlers = $self->_get_handler_paths();
+  foreach my $path (keys %{$handlers}) {
+    my $methods = $handlers->{$path}{'methods'};
+    if ($path eq '') {
+      $path = 'GLOBAL';
+    }
+    print "\n$path\n";
+    foreach my $method (@{$methods}) {
+      print "\t$method\n";
+    }
+  }
+  print "---------------------------------------------------\n";
 }
 
 =head2 get_pod
@@ -115,4 +121,14 @@ sub doc : Regex('/doc$') {
   gets pod for a function
 
 =cut
+
+
+=head2 _init
+ 
+  Override in modules for extra setup needed, ie ldap connection etc.
+
+=cut
+sub _init {
+}
+
 1;
