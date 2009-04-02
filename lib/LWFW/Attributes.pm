@@ -55,7 +55,7 @@ sub _get_handler_paths {
 
       # Store package and method details
       $handlers{$path}{'package'} = $package;
-      push @{$handlers{$path}{'methods'}}, lc($method_name);
+      push @{$handlers{$path}{'methods'}}, $method_name;
     }
   }
 
