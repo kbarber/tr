@@ -24,7 +24,6 @@ sub _load_plugins {
 
   my $module_dir = $self->_get_path_to_module();
 
-  print "Module: $module_dir\n";
   find(sub { _load_module($File::Find::name, $module_dir) }, $module_dir);
 }
 
