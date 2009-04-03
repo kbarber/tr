@@ -2,11 +2,13 @@ package LWFW;
 use strict;
 use warnings;
 use attributes;
-use feature ":5.10";
-use mro;
+use feature ":5.10"; 
+use mro;  # 5.10...
 
 use CGI();
 use PPI();
+use LWFW::Exceptions;
+use Scope::Guard;  # Alternative to eval {}; if ($@) { _error_handler($self, $@) };
 
 use base qw/LWFW::Attributes LWFW::Plugins/;
 __PACKAGE__->mk_ro_accessors(qw/request context/);
@@ -38,6 +40,9 @@ sub new {
                request => $request,
              }, $class;
 
+  # Exception handling from here on in.
+  my $sg = Scope::Guard->new(sub { _error_handler($self, $@) });
+
   $self->_load_plugins();
   $self->_init();
 
@@ -48,42 +53,43 @@ sub new {
     eval("use $content_package;
           \$self->{'context'} = new $content_package(\$self)");
     if ($@) {
-      warn "Don't know how to handle $content_type: $@\n";
+      E::Invalid::ContentType->throw($@);
     }
   }
   else {
-      warn "Unknown content_type $content_type\n";
+    E::Invalid::ContentType->throw($@);
   }
 
+  $self->forward($self->request->url(-absolute => 1));
+
+
+  $sg->dismiss();
   return $self;
 }
 
-=head2 dispatch
+=head2 forward
 
   Takes a path and works out whether to handle it or pass it off to another 
   module to handle.
 
 =cut
-sub dispatch {
-    my $self = shift;
+sub forward {
+  my $self = shift;
 
-    my $path = shift || $self->request->url(-absolute => 1);
+  my $path = shift;
     
-    my $handlers_by_path = $self->_get_handler_paths;
+  my $handlers_by_path = $self->_get_handler_paths;
 
-    if (my $handler = $handlers_by_path->{$path}) {
-      my $handler_module = $handler->{'package'};
+  if (my $handler = $handlers_by_path->{$path}) {
+    my $handler_module = $handler->{'package'};
      
-      my $new_module = bless $self, $handler_module;
-      $new_module->_init();
-      return $new_module->_run_method();
-
-    }
-    elsif(not $self->_run_method()) {
-      return $self->doc();
-    }
-
-    return 1;
+    my $new_module = bless $self, $handler_module;
+    $new_module->_init();
+    $new_module->_run_method();
+  }
+  else {
+    $self->_run_method();
+  }
 }
 
 =head2 _run_method 
@@ -102,13 +108,10 @@ sub _run_method {
 
   if (my $cv = $self->can($method)) {
     $self->$method();    
-    return 1;
   }
   else {
-    warn "Don't know how to handle $method\n"; 
+    E::Invalid::Method->throw($method);
   }
-
-  return;
 }
 
 =head2 doc
@@ -138,8 +141,6 @@ sub doc : Regex('/doc$') {
     }
   }
   print "---------------------------------------------------\n";
-
-  return 1;
 }
 
 =head2 _get_pod
@@ -195,6 +196,16 @@ sub _get_pod {
   }
 
   return;
+}
+
+=head2 _error_handler
+
+  Handle errors in module.
+
+=cut
+sub _error_handler {
+  my ($self, $exception) = @_;
+  print $exception->description() . ': ' . $exception->error . "\n";
 }
 
 =head2 _init

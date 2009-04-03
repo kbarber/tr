@@ -35,3 +35,6 @@ TODO:
   Exception handling:
     Remove ugly "returns" needed for Test::More, more to exceptions and
     exception testing.
+
+  Not happy with content-type handling - modules should register what 
+  types they handle, rather than loading module based on content-type.

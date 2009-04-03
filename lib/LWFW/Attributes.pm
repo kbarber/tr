@@ -2,21 +2,39 @@ package LWFW::Attributes;
 use strict;
 use warnings;
 use Attribute::Handlers;
+use Kwalify;
+use Data::Dumper;
 
-use base 'Class::Accessor::Fast';
+=head2 UNIVERSAL::Local
 
+  Handles the Local attribute given to methods and matches
+  paths to handle base on Module and method name.
+
+=cut
 sub UNIVERSAL::Local : ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data) = @_;
   push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
 }
 
+=head2 UNIVERSAL::Regex
+
+  Handles the Regex attribute given to methods and matches
+  paths to handle with a regex
+
+=cut
 sub UNIVERSAL::Regex : ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data) = @_;
   push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
 }
 
+=head2 UNIVERSAL::Params
+
+  Handles the Params attribute when given to methods
+  and checks parameters passed before running method.
+
+=cut
 sub UNIVERSAL::Params : ATTR(CODE) {
-  print "Stuff...\n"; 
+  print Dumper @_;
 }
 
 =head2 _get_handler_paths
@@ -47,7 +65,8 @@ sub _get_handler_paths {
 
 =head2 _get_name_by_code_ref
 
-  Resolves a code ref to sub name
+  Resolves a code ref to sub name, a bit ugly but attributes pass
+  symbols and not method names.
 
 =cut
 sub _get_name_by_code_ref {

@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use Cwd qw/realpath/;
 use File::Find qw/find/;
-
 use base 'Class::Accessor::Fast';
 
 $LWFW::Plugins::Loaded = 0;

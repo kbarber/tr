@@ -8,6 +8,7 @@ use lib "$Bin/../lib";
 use lib "$Bin";
 
 use Test::More tests => 3;
+use Test::Exception;
 
 use_ok('LWFW');
 
@@ -29,7 +30,7 @@ $ENV{'SCRIPT_NAME'}    = "/";
   $ENV{'CONTENT_LENGTH'} = length($test_json);
   my $cgi = new CGI({POSTDATA => $test_json});
 
-  ok(my $fw = LWFW->new($cgi), 'Can create LWFW object');
-  ok($fw->dispatch(), "Can dispatch $ENV{'SCRIPT_NAME'})");
+  my $fw;
+  lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
 }
 
