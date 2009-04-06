@@ -125,4 +125,26 @@ sub retrieve_json_from_get {
   # TODO
 }
 
+=head2 view
+
+  Displays stash
+
+=cut
+sub view {
+  my $self = shift;
+
+  print "Content-type: application/json\n\n";
+
+  my %rpcdata;
+  $rpcdata{'jsonrpc'} = '2.0';
+
+  my $result = $self->framework->stash->{'result'};
+  $rpcdata{'result'} = $result;  
+  if (my $id = $self->json_request->{'id'}) {
+    $rpcdata{'id'} = $id;
+  }
+
+  print encode_json \%rpcdata;
+}
+
 1;

@@ -2,8 +2,23 @@ package LWFW::Attributes;
 use strict;
 use warnings;
 use Attribute::Handlers;
-use Kwalify;
 use Data::Dumper;
+
+=head2 UNIVERSAL::Params
+
+  Handles the Params attribute when given to methods
+  and checks parameters passed before running method.
+
+=cut
+sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
+  my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
+  if (not ref($data) eq 'ARRAY') {
+    return; # TODO: Maybe warn
+  }
+  else {
+    push @{$LWFW::method_schema{$package}{$referent}}, $data;
+  }
+}
 
 =head2 UNIVERSAL::Local
 
@@ -11,8 +26,8 @@ use Data::Dumper;
   paths to handle base on Module and method name.
 
 =cut
-sub UNIVERSAL::Local : ATTR(CODE, BEGIN) {
-  my ($package, $symbol, $referent, $attr, $data) = @_;
+sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
+  my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
   push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
 }
 
@@ -22,19 +37,9 @@ sub UNIVERSAL::Local : ATTR(CODE, BEGIN) {
   paths to handle with a regex
 
 =cut
-sub UNIVERSAL::Regex : ATTR(CODE, BEGIN) {
-  my ($package, $symbol, $referent, $attr, $data) = @_;
+sub UNIVERSAL::Regex :ATTR(CODE, BEGIN) {
+  my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
   push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
-}
-
-=head2 UNIVERSAL::Params
-
-  Handles the Params attribute when given to methods
-  and checks parameters passed before running method.
-
-=cut
-sub UNIVERSAL::Params : ATTR(CODE) {
-  print Dumper @_;
 }
 
 =head2 _get_handler_paths
@@ -42,9 +47,9 @@ sub UNIVERSAL::Params : ATTR(CODE) {
   Returns list of handlers registered with attributes
 
 =cut
+my %handlers;  # Only generate once.
 sub _get_handler_paths {
-  my %handlers = ();
-
+  return \%handlers if %handlers;
   foreach my $package  (keys %LWFW::attribute_cache) {
     foreach my $code_ref (keys %{$LWFW::attribute_cache{$package}}) {
       my $method_name = _get_name_by_code_ref($package, $code_ref);
@@ -53,6 +58,10 @@ sub _get_handler_paths {
       my $path = lc($package);
       $path =~ s#::#/#g;
       $path =~ s#^[^/]+##; # Remove base package name
+
+      # Not happy about having this here at all, need to sort out
+      # Attribute handling to work better.
+      my $full_method_name = $package . '::' . $method_name;
 
       # Store package and method details
       $handlers{$path}{'package'} = $package;
@@ -66,13 +75,14 @@ sub _get_handler_paths {
 =head2 _get_name_by_code_ref
 
   Resolves a code ref to sub name, a bit ugly but attributes pass
-  symbols and not method names.
+  symbols and not method names in BEGIN.
 
 =cut
 sub _get_name_by_code_ref {
   my ($package, $code_ref) = @_;
 
   my %symbol_table;
+
   eval('%symbol_table = %' . $package . '::'); 
   foreach my $entry (keys %symbol_table) {
     my $symbol = $symbol_table{$entry};
@@ -82,6 +92,30 @@ sub _get_name_by_code_ref {
       }
     }
   }
+}
+
+=head2 _is_public_method 
+
+  Checks to see if a method is allowed.
+
+=cut
+sub _is_public_method {
+  my $self   = shift;
+  my $method = shift;
+
+  my $package = ref($self);
+
+  if (my $cv = $self->can($method)) {
+    if (defined $LWFW::attribute_cache{$package} and
+        defined $LWFW::attribute_cache{$package}{$cv}) {
+      my @attributes = @{$LWFW::attribute_cache{$package}{$cv}};
+      if (@attributes ~~ /Local/) {
+        return 1;
+      }
+    }
+  }
+
+  return;
 }
 
 1;
