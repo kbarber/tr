@@ -138,8 +138,18 @@ sub view {
   my %rpcdata;
   $rpcdata{'jsonrpc'} = '2.0';
 
-  my $result = $self->framework->stash->{'result'};
-  $rpcdata{'result'} = $result;  
+  if (my $error = $self->framework->stash->{'error'}) {
+    $rpcdata{'error'} = {
+      name    => "JSONRPCError",
+      code    => "1000", # TODO
+      message => $error
+    };
+  }
+  else {
+    my $result = $self->framework->stash->{'result'};
+    $rpcdata{'result'} = $result;  
+  }
+  
   if (my $id = $self->json_request->{'id'}) {
     $rpcdata{'id'} = $id;
   }

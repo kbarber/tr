@@ -171,7 +171,7 @@ sub validate_params {
     }
 
 =cut
-sub doc :Global {
+sub doc :Global { # TODO: in JSON RPC move to system.* namespace
 =begin schema
   {
     "type": "map",
@@ -236,7 +236,7 @@ sub doc :Global {
     }
 
 =cut
-sub schema :Global {
+sub schema :Global {  # TODO: in JSON RPC move to system.* namespace
 =begin schema
   {
     "type": "map",
