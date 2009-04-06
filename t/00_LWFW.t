@@ -37,6 +37,23 @@ $ENV{'SCRIPT_NAME'}    = "/";
 {
   my $test_json = '{
     "jsonrpc":"2.0",
+    "method":"_get_pod",
+    "params":{
+      "aparam":"testtext"
+    },
+    "id":1
+  }';
+
+  $ENV{'CONTENT_LENGTH'} = length($test_json);
+  my $cgi = new CGI({POSTDATA => $test_json});
+
+  my $fw;
+  dies_ok { $fw = LWFW->new($cgi) } 'LWFW object dies with incorrect method';
+}
+
+{
+  my $test_json = '{
+    "jsonrpc":"2.0",
     "method":"doc",
     "params":{
       "show":"schema"

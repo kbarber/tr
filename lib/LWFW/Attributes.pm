@@ -28,7 +28,7 @@ sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
 =cut
 sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
+  push @{$LWFW::attribute_cache{'Local'}{$package}{$referent}}, $attr;
 }
 
 =head2 UNIVERSAL::Regex
@@ -37,9 +37,9 @@ sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
   paths to handle with a regex
 
 =cut
-sub UNIVERSAL::Regex :ATTR(CODE, BEGIN) {
+sub UNIVERSAL::Global :ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  push @{$LWFW::attribute_cache{$package}{$referent}}, $attr;
+  push @{$LWFW::attribute_cache{'Global'}{$package}{$referent}}, $attr;
 }
 
 =head2 _get_handler_paths
@@ -50,8 +50,8 @@ sub UNIVERSAL::Regex :ATTR(CODE, BEGIN) {
 my %handlers;  # Only generate once.
 sub _get_handler_paths {
   return \%handlers if %handlers;
-  foreach my $package  (keys %LWFW::attribute_cache) {
-    foreach my $code_ref (keys %{$LWFW::attribute_cache{$package}}) {
+  foreach my $package  (keys %{$LWFW::attribute_cache{'Local'}}) {
+    foreach my $code_ref (keys %{$LWFW::attribute_cache{'Local'}{$package}}) {
       my $method_name = _get_name_by_code_ref($package, $code_ref);
 
       # generate a path from package/method
@@ -106,11 +106,17 @@ sub _is_public_method {
   my $package = ref($self);
 
   if (my $cv = $self->can($method)) {
-    if (defined $LWFW::attribute_cache{$package} and
-        defined $LWFW::attribute_cache{$package}{$cv}) {
-      my @attributes = @{$LWFW::attribute_cache{$package}{$cv}};
-      if (@attributes ~~ /Local/) {
-        return 1;
+    # Local
+    if (defined $LWFW::attribute_cache{'Local'}{$package} and
+        defined $LWFW::attribute_cache{'Local'}{$package}{$cv}) {
+      return 1;
+    }
+    else {
+    # Global
+      foreach my $pkg (keys %{$LWFW::attribute_cache{'Global'}}) {
+        if (defined $LWFW::attribute_cache{'Global'}{$pkg}{$cv}) {
+          return 1;
+        }
       }
     }
   }

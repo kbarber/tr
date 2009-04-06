@@ -167,12 +167,11 @@ sub validate_params {
   Response:
     {
       "jsonrpc":"2.0",
-      "result": {"doc":"... documentation ... "} 
+      "result": {"doc":" ...documentation... "} 
     }
 
 =cut
-sub doc :Local
-        :Regex('/doc$') {
+sub doc :Global {
 =begin schema
   {
     "type": "map",
@@ -231,10 +230,13 @@ sub doc :Local
     ' 'http://tr.test.alfresco.com/t/'
 
   Response:
-    {"jsonrpc":"2.0","result":null}
+    {
+      "jsonrpc":"2.0",
+      "result": {"schema": " ...Kwalify schema... "} 
+    }
 
 =cut
-sub schema :Local {
+sub schema :Global {
 =begin schema
   {
     "type": "map",
@@ -252,7 +254,7 @@ sub schema :Local {
       if ($self->_is_public_method($params->{'show'})) {
         if (my $pod = $self->_get_schema(package => ref($self),
                                          method  => $params->{'show'})) {
-          $self->stash->{'result'} = { doc => $pod };
+          $self->stash->{'result'} = { schema => $pod };
           return;
         }
       }
