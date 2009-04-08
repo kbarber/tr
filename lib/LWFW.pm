@@ -5,6 +5,7 @@ use utf8;
 use attributes;
 use feature ":5.10"; 
 use mro;  # 5.10...
+use Want;
 
 use CGI();
 use PPI();
@@ -98,9 +99,7 @@ sub handler {
 
 =cut
 sub forward {
-  my $self = shift;
-
-  my $path = shift;
+  my ($self, $path, %args) = @_;
 
   my $handlers_by_path = $self->_get_handler_paths;
 
@@ -109,11 +108,17 @@ sub forward {
      
     my $new_module = bless $self, $handler_module;
     $new_module->_init();
-    $new_module->_run_method();
+    $new_module->_run_method($args{'method'});
   }
   else {
-    $self->_run_method();
+    $self->_run_method($args{'method'});
   }
+
+  if (want('SCALAR')) {
+    return delete $self->stash->{'result'};
+  }
+
+  return;
 }
 
 =head2 _run_method 
@@ -127,8 +132,9 @@ sub forward {
 =cut
 sub _run_method {
   my $self   = shift;
+  my $method = shift || $self->context->method();
 
-  if (my $method = $self->context->method()) {
+  if ($method) {
     if ($self->_is_public_method($method)) {
       if (my $schema = $self->_get_schema(package => ref($self),
                                           method  => $method)) {

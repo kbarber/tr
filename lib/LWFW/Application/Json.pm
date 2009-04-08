@@ -100,6 +100,21 @@ sub params {
   return;
 }
 
+=head2 set_params
+
+  Work around for setting params for others.  TODO - do in a better way?
+
+=cut
+sub set_params {
+  my $self   = shift;
+  my %params = @_;
+
+  $self->{'json_request'}{'params'} = \%params;
+
+  return;
+}
+
+
 =head2 retrieve_json_from_post
 
   Grabs POST data 
