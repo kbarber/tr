@@ -7,7 +7,7 @@ use CGI;
 use lib "$Bin/../lib";
 use lib "$Bin";
 
-use Test::More tests => 4;
+use Test::More tests => 9;
 use Test::Exception;
 
 use_ok('LWFW');
@@ -31,7 +31,8 @@ $ENV{'SCRIPT_NAME'}    = "/";
   my $cgi = new CGI({POSTDATA => $test_json});
 
   my $fw;
-  dies_ok { $fw = LWFW->new($cgi) } 'LWFW object dies with incorrect method';
+  lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
+  lives_ok { $fw->handler() } 'LWFW object error with incorrect method';
 }
 
 {
@@ -48,7 +49,8 @@ $ENV{'SCRIPT_NAME'}    = "/";
   my $cgi = new CGI({POSTDATA => $test_json});
 
   my $fw;
-  dies_ok { $fw = LWFW->new($cgi) } 'LWFW object dies with incorrect method';
+  lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
+  lives_ok { $fw->handler() } 'LWFW object errors with incorrect method';
 }
 
 {
@@ -64,7 +66,8 @@ $ENV{'SCRIPT_NAME'}    = "/";
   my $cgi = new CGI({POSTDATA => $test_json});
 
   my $fw;
-  lives_ok { $fw = LWFW->new($cgi) } 'Can show doc for schema';
+  lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
+  lives_ok { $fw->handler() } 'Can show doc for schema';
 }
 
 {
@@ -80,6 +83,7 @@ $ENV{'SCRIPT_NAME'}    = "/";
   my $cgi = new CGI({POSTDATA => $test_json});
 
   my $fw;
-  lives_ok { $fw = LWFW->new($cgi) } 'Can show schema for doc';
+  lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
+  lives_ok { $fw->handler() } 'Can show schema for doc';
 }
 

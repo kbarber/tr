@@ -1,6 +1,7 @@
 package LWFW::Application::Json;
 use strict;
 use warnings;
+use utf8;
 use feature ":5.10";
 
 use JSON::XS;
@@ -17,7 +18,7 @@ sub new {
   my($class) = ref $proto || $proto;
 
   my $framework = shift or die 'No framework object passed';
-  my $coder = JSON::XS->new->ascii->pretty->allow_nonref;
+  my $coder = JSON::XS->new->utf8->pretty(1)->allow_nonref;
 
   my $self = bless {
                framework => $framework,
@@ -154,7 +155,7 @@ sub view {
     $rpcdata{'id'} = $id;
   }
 
-  print encode_json \%rpcdata;
+  print $self->coder->encode(\%rpcdata);
 }
 
 1;

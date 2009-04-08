@@ -1,22 +1,23 @@
 package LWFW;
 use strict;
 use warnings;
+use utf8;
 use attributes;
 use feature ":5.10"; 
 use mro;  # 5.10...
 
 use CGI();
-use PPI::Cache path => '/var/cache/ppi-cache';
+use PPI();
+# use PPI::Cache path => '/var/cache/ppi-cache';
 
 # Schema validation support.
 use Kwalify qw(validate);
 use JSON::XS qw(decode_json);
 
-use Scope::Guard;  # Alternative to eval()
-
 use LWFW::Exceptions;
 use base qw/LWFW::Attributes LWFW::Plugins/;
 __PACKAGE__->mk_ro_accessors(qw/request context stash/);
+__PACKAGE__->mk_accessors(qw/debug/);
 
 use Data::Dumper;
 
@@ -46,36 +47,48 @@ sub new {
                request => $request,
              }, $class;
 
-  # Exception handling from here on in.
-  my $sg = Scope::Guard->new(sub { _error_handler($self, $@) });
+  eval {
+    $self->_load_plugins();
+    $self->_init();
 
-  $self->_load_plugins();
-  $self->_init();
-
-  # Have different handlers per content-type?
-  my ($content_type) = $self->request->content_type() || 'text/html';
-  if ($content_type =~ m#([^/]+)/([^/]+)#) {
-    my $content_package = join('::', __PACKAGE__, ucfirst($1), ucfirst($2));
-    eval("use $content_package;
-          \$self->{'context'} = new $content_package(\$self)");
-    if ($@) {
-      E::Invalid::ContentType->throw($@);
+    # Have different handlers per content-type?
+    my ($content_type) = $self->request->content_type() || 'text/html';
+    if ($content_type =~ m#([^/]+)/([^/]+)#) {
+      my $content_package = join('::', __PACKAGE__, ucfirst($1), ucfirst($2));
+      eval("use $content_package;
+            \$self->{'context'} = new $content_package(\$self)");
+      if ($@) {
+        E::Invalid::ContentType->throw($@);
+      }
     }
-  }
-  else {
-    E::Invalid::ContentType->throw("Don't know how to handle: " .
-                                   $content_type);
+    else {
+      E::Invalid::ContentType->throw("Don't know how to handle: " .
+                                     $content_type);
+    }
+  };
+  if ($@) {
+    $self->_error_handler($@);
   }
 
-  $self->forward($self->request->url(-absolute => 1));
+  return $self;
+}
 
-  $sg->dismiss();
+=head2 handler
+
+=cut
+sub handler {
+  my $self = shift;
+
+  eval {
+    $self->forward($self->request->url(-absolute => 1));
+  };
+  if ($@) {
+    $self->_error_handler($@);
+  }
 
   if ($self->context) {
     $self->context->view();
   }
-
-  return $self;
 }
 
 =head2 forward
@@ -121,7 +134,7 @@ sub _run_method {
                                           method  => $method)) {
         $self->validate_params(schema => $schema);
       }
-      return $self->$method();    
+      return $self->$method($self->context());
     }
     else {
       E::Invalid::Method->throw($method);
@@ -361,16 +374,18 @@ sub _get_schema {
 =cut
 sub _error_handler {
   my ($self, $exception) = @_;
+
   if (ref($exception)) {
     $self->stash->{'error'} = $exception->description() . ': ' .
-                              $exception->error;
+                                     $exception->error;
+
+    if ($self->debug()) {
+      warn $exception->time . ' :DEBUG INFO: ' . $exception->trace->as_string;
+                                 
+    }
   }
   else {
     $self->stash->{'error'} = "Unknown error: $exception";
-  }
-
-  if ($self->context) {
-    $self->context->view();
   }
 }
 

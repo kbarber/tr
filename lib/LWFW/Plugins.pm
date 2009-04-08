@@ -3,8 +3,9 @@ use strict;
 use warnings;
 use Cwd qw/realpath/;
 use File::Find qw/find/;
-use base 'Class::Accessor::Fast';
+use LWFW::Exceptions;
 
+use base 'Class::Accessor::Fast';
 $LWFW::Plugins::Loaded = 0;
 
 =head2 _load_plugins
@@ -68,7 +69,7 @@ sub _load_module {
     $module =~ s#/#::#g;
     eval("use $module;");
     if ($@) {
-      print "Failed to load module: $@\n";
+      E::Fatal->throw("Failed to load module '$module': $@");
     }
   }
 }
