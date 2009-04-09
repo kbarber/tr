@@ -97,6 +97,9 @@ sub handler {
   Takes a path and works out whether to handle it or pass it off to another 
   module to handle.
 
+  Has some ugly reblessing hackery at the moment, going to restructure code
+  later :(
+
 =cut
 sub forward {
   my ($self, $path, %args) = @_;
@@ -105,10 +108,22 @@ sub forward {
 
   if (my $handler = $handlers_by_path->{$path}) {
     my $handler_module = $handler->{'package'};
-     
-    my $new_module = bless $self, $handler_module;
-    $new_module->_init();
-    $new_module->_run_method($args{'method'});
+
+    my ($handler, $orig_class);
+    if (ref($self) eq $handler_module) {
+      $handler = $self;
+    }
+    else {
+      # Don't need to do this if internally forwarding with a module
+      $orig_class = ref($self);
+      $handler = bless $self, $handler_module;
+      $handler->_init();
+    }
+    $handler->_run_method($args{'method'});
+    if ($orig_class) {
+      bless $self, $orig_class;
+    }
+
   }
   else {
     $self->_run_method($args{'method'});
