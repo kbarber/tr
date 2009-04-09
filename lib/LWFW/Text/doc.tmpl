@@ -32,12 +32,18 @@
     </ul>
   [% END %]
   [% IF doc.poddoc %]
-    <p>Documentation for: [% doc.method %]
-    <p>[% doc.poddoc %]</p>
+    [% FILTER html_para %]
+      <h3>[% doc.method %]</h3>
+
+      [% doc.poddoc FILTER html_line_break %]
+    [% END %]
   [% END %]
   [% IF doc.schema %]
-    <p>Schema for: [% doc.method %]
-    <p>[% doc.schema %]</p>
+    [% FILTER html_para %]
+      <h3>Schema for: [% doc.method %]</h3>
+
+      [% doc.schema FILTER html_line_break %]
+    [% END %]
   [% END %]
 </body>
 </html>

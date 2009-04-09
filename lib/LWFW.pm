@@ -378,7 +378,6 @@ sub _get_pod {
       my $content = @$results[0]->content();
       $content =~ s/=head2 $args{'method'}//m;
       $content =~ s/=cut//m;
-      $content =~ s/\s{2}/ /gm;
       return $content;
     }
   }

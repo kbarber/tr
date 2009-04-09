@@ -71,6 +71,16 @@ sub view {
 
   if (my $result = $self->framework->stash->{'result'}) {
     if ($result->{'doc'}) {
+      # Play with the doc or schema text so that it displays nicely.
+      if($result->{'doc'}->{'schema'}) {
+        $result->{'doc'}->{'schema'} =~ s/ /&nbsp;/g;
+        $result->{'doc'}->{'schema'} =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
+      }
+      if($result->{'doc'}->{'poddoc'}) {
+        $result->{'doc'}->{'poddoc'} =~ s/ /&nbsp;/g;
+        $result->{'doc'}->{'poddoc'} =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
+      }
+
       my $tt = Template->new(ABSOLUTE => 1);
       $tt->process('/home/knoxc/Projects/TR.perl/engine/lib/LWFW/Text/doc.tmpl', $result)
         || warn $tt->error();
