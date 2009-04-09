@@ -2,8 +2,6 @@ package LWFW::Text::Html;
 use strict;
 use warnings;
 use Template;
-use Data::Dumper;
-
 use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_ro_accessors(qw/framework request/);
 
@@ -70,19 +68,10 @@ sub view {
   print "Content-type: text/html\n\n";
 
   if (my $result = $self->framework->stash->{'result'}) {
+    my $path = $self->framework->_get_path_to_module(ref $self);
     if ($result->{'doc'}) {
-      # Play with the doc or schema text so that it displays nicely.
-      if($result->{'doc'}->{'schema'}) {
-        $result->{'doc'}->{'schema'} =~ s/ /&nbsp;/g;
-        $result->{'doc'}->{'schema'} =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-      }
-      if($result->{'doc'}->{'poddoc'}) {
-        $result->{'doc'}->{'poddoc'} =~ s/ /&nbsp;/g;
-        $result->{'doc'}->{'poddoc'} =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-      }
-
-      my $tt = Template->new(ABSOLUTE => 1);
-      $tt->process('/home/knoxc/Projects/TR.perl/engine/lib/LWFW/Text/doc.tmpl', $result)
+      my $tt = Template->new(INCLUDE_PATH => $path);
+      $tt->process('doc.tmpl', $result)
         || warn $tt->error();
     }
     else {

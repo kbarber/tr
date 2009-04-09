@@ -34,15 +34,13 @@
   [% IF doc.poddoc %]
     [% FILTER html_para %]
       <h3>[% doc.method %]</h3>
-
-      [% doc.poddoc FILTER html_line_break %]
+      <pre>[% doc.poddoc %]</pre>
     [% END %]
   [% END %]
   [% IF doc.schema %]
     [% FILTER html_para %]
       <h3>Schema for: [% doc.method %]</h3>
-
-      [% doc.schema FILTER html_line_break %]
+      <pre>[% doc.schema %]</pre>
     [% END %]
   [% END %]
 </body>
