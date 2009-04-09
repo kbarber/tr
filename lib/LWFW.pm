@@ -17,8 +17,10 @@ use JSON::XS qw(decode_json);
 
 use LWFW::Exceptions;
 use base qw/LWFW::Attributes LWFW::Plugins/;
-__PACKAGE__->mk_ro_accessors(qw/request context stash/);
+__PACKAGE__->mk_ro_accessors(qw/request context stash version/);
 __PACKAGE__->mk_accessors(qw/debug/);
+
+my $VERSION = '0.01';
 
 use Data::Dumper;
 
@@ -44,6 +46,7 @@ sub new {
   }
 
   my $self = bless {
+               version => $VERSION,
                stash   => {},
                request => $request,
              }, $class;
@@ -150,6 +153,7 @@ sub _run_method {
   my $method = shift || $self->context->method();
 
   if ($method) {
+    $method =~ s/\./_/;
     if ($self->_is_public_method($method)) {
       if (my $schema = $self->_get_schema(package => ref($self),
                                           method  => $method)) {
@@ -185,13 +189,38 @@ sub validate_params {
   }
 }
 
-=head2 doc
+=head2 system_version
 
   Request:
     time curl -H 'Content-Type: application/json' -u test:test -X POST -d '
     {
       "jsonrpc":"2.0",
-      "method":"doc",
+      "method":"system.version",
+    }
+    ' 'http://tr.test.alfresco.com/t/ldap/user'
+
+  Response:
+    {
+      "jsonrpc":"2.0",
+      "result": {"version":"x.x"} 
+    }
+
+=cut
+sub system_version :Global {
+  my $self = shift;
+
+  $self->stash->{'result'} = {version => $self->version};
+
+  return;
+}
+
+=head2 system_doc
+
+  Request:
+    time curl -H 'Content-Type: application/json' -u test:test -X POST -d '
+    {
+      "jsonrpc":"2.0",
+      "method":"system.doc",
       "params":{
         "show":"getDnByUid"
       }
@@ -205,7 +234,7 @@ sub validate_params {
     }
 
 =cut
-sub doc :Global { # TODO: in JSON RPC move to system.* namespace
+sub system_doc :Global {
 =begin schema
   {
     "type": "map",
@@ -250,13 +279,13 @@ sub doc :Global { # TODO: in JSON RPC move to system.* namespace
   $self->stash->{'result'} = \%result;
 }
 
-=head2 schema
+=head2 system_schema
 
   Request:
     time curl -H 'Content-Type: application/json' -u test:test -X POST -d '
     {
       "jsonrpc":"2.0",
-      "method":"schema",
+      "method":"system.schema",
       "params":{
         "show":"doc"
       }
@@ -270,7 +299,7 @@ sub doc :Global { # TODO: in JSON RPC move to system.* namespace
     }
 
 =cut
-sub schema :Global {  # TODO: in JSON RPC move to system.* namespace
+sub system_schema :Global {
 =begin schema
   {
     "type": "map",

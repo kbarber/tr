@@ -7,7 +7,7 @@ use CGI;
 use lib "$Bin/../lib";
 use lib "$Bin";
 
-use Test::More tests => 9;
+use Test::More tests => 11;
 use Test::Exception;
 
 use_ok('LWFW');
@@ -56,9 +56,9 @@ $ENV{'SCRIPT_NAME'}    = "/";
 {
   my $test_json = '{
     "jsonrpc":"2.0",
-    "method":"doc",
+    "method":"system.doc",
     "params":{
-      "show":"schema"
+      "show":"system_schema"
     }
   }';
 
@@ -73,9 +73,9 @@ $ENV{'SCRIPT_NAME'}    = "/";
 {
   my $test_json = '{
     "jsonrpc":"2.0",
-    "method":"schema",
+    "method":"system.schema",
     "params":{
-      "show":"doc"
+      "show":"system_doc"
     }
   }';
 
@@ -85,5 +85,19 @@ $ENV{'SCRIPT_NAME'}    = "/";
   my $fw;
   lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
   lives_ok { $fw->handler() } 'Can show schema for doc';
+}
+
+{
+  my $test_json = '{
+    "jsonrpc":"2.0",
+    "method":"system.version",
+  }';
+
+  $ENV{'CONTENT_LENGTH'} = length($test_json);
+  my $cgi = new CGI({POSTDATA => $test_json});
+
+  my $fw;
+  lives_ok { $fw = LWFW->new($cgi) } 'Can create LWFW object';
+  lives_ok { $fw->handler() } 'Can get version';
 }
 
