@@ -247,13 +247,16 @@ sub system_doc :Global {
 
   my $self = shift;
 
+  $self->stash->{'result'}->{'doc'}->{'version'} = $self->version;
+
   # See if documentation for a specific method was wanted
   if ($self->context) {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
         if (my $pod = $self->_get_pod(package => ref($self),
                                       method  => $params->{'show'})) {
-          $self->stash->{'result'} = { doc => $pod };
+          $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
+          $self->stash->{'result'}->{'doc'}->{'poddoc'} = $pod;
           return;
         }
       }
@@ -269,14 +272,9 @@ sub system_doc :Global {
     if ($path eq '') {
       $path = 'GLOBAL';
     }
-    foreach my $method (@{$methods}) {
-      if (my $poddoc = $self->_get_pod(package => $package,
-                                       method => $method)) {
-        $result{$path}{$method} = $poddoc;
-      }
-    }
+    $result{$path} = $methods;
   }
-  $self->stash->{'result'} = \%result;
+  $self->stash->{'result'}->{'doc'}->{'paths'} = \%result;
 }
 
 =head2 system_schema
@@ -312,14 +310,20 @@ sub system_schema :Global {
 
   my $self = shift;
 
+  $self->stash->{'result'}->{'doc'}->{'version'} = $self->version;
+
   if ($self->context) {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
+        $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
         if (my $pod = $self->_get_schema(package => ref($self),
                                          method  => $params->{'show'})) {
-          $self->stash->{'result'} = { schema => $pod };
-          return;
+          $self->stash->{'result'}->{'doc'}->{'schema'} = $pod;
         }
+        else {
+          $self->stash->{'result'}->{'doc'}->{'schema'} = 'No schema.';
+        }
+        return;
       }
     }
   }

@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title>Documentation for TR</title>
+		<link rel="stylesheet" href="https://team.alfresco.com/w/skins/common/shared.css?195" type="text/css" media="screen" />
+		<link rel="stylesheet" href="https://team.alfresco.com/w/skins/common/commonPrint.css?195" type="text/css" media="print" />
+		<link rel="stylesheet" href="https://team.alfresco.com/w/skins/monobook/main.css?195" type="text/css" media="screen" />
+		<!--[if lt IE 5.5000]><link rel="stylesheet" href="https://team.alfresco.com/w/skins/monobook/IE50Fixes.css?195" type="text/css" media="screen" /><![endif]-->
+
+		<!--[if IE 5.5000]><link rel="stylesheet" href="https://team.alfresco.com/w/skins/monobook/IE55Fixes.css?195" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 6]><link rel="stylesheet" href="https://team.alfresco.com/w/skins/monobook/IE60Fixes.css?195" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 7]><link rel="stylesheet" href="https://team.alfresco.com/w/skins/monobook/IE70Fixes.css?195" type="text/css" media="screen" /><![endif]-->
+		<link rel="stylesheet" href="https://team.alfresco.com/w/index.php?title=MediaWiki:Common.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="https://team.alfresco.com/w/index.php?title=MediaWiki:Print.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" media="print" />
+		<link rel="stylesheet" href="https://team.alfresco.com/w/index.php?title=MediaWiki:Monobook.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="https://team.alfresco.com/w/index.php?title=-&amp;action=raw&amp;maxage=18000&amp;smaxage=0&amp;ts=20090409152818&amp;gen=css" type="text/css" />
+		<!--[if lt IE 7]><script type="text/javascript" src="https://team.alfresco.com/w/skins/common/IEFixes.js?195"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+</head>
+   
+<body>
+  <h1 id="firstHeading" class="firstHeading">Documentation for TR version: [% doc.version %]</h1>
+  
+  [% FOREACH path IN doc.paths -%]
+    <ul>
+      <li><span class="toctext">[% path.key %]</span></li>
+      <ul>
+      [% FOREACH method IN path.value -%]
+        <li><a href="[% path.key %]?method=system.doc&show=[% method %]">[% method %]</a>
+        <a href="[% path.key %]?method=system.schema&show=[% method %]">(schema)</a></li>
+      [% END %]
+      </ul>
+    </ul>
+  [% END %]
+  [% IF doc.poddoc %]
+    <p>Documentation for: [% doc.method %]
+    <p>[% doc.poddoc %]</p>
+  [% END %]
+  [% IF doc.schema %]
+    <p>Schema for: [% doc.method %]
+    <p>[% doc.schema %]</p>
+  [% END %]
+</body>
+</html>

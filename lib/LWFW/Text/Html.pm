@@ -1,7 +1,7 @@
 package LWFW::Text::Html;
 use strict;
 use warnings;
-use HTML::Template;
+use Template;
 use Data::Dumper;
 
 use base 'Class::Accessor::Fast';
@@ -68,19 +68,27 @@ sub view {
   my $self = shift;
 
   print "Content-type: text/html\n\n";
-  print "<html><head>\n";
-  print "<title>TR</title>\n";
-  print "</head>\n";
-  print "<body>";
 
-  if (my $data = $self->framework->stash) {
-    print Dumper $data;
+  if (my $result = $self->framework->stash->{'result'}) {
+    if ($result->{'doc'}) {
+      my $tt = Template->new(ABSOLUTE => 1);
+      $tt->process('/home/knoxc/Projects/TR.perl/engine/lib/LWFW/Text/doc.tmpl', $result)
+        || warn $tt->error();
+    }
+    else {
+      print Dumper $result;
+    }
   }
   else {
+    print "<html><head>\n";
+    print "<title>TR</title>\n";
+    print "</head>\n";
+    print "<body>";
+
     print "<p>No data to display</p>";
+
+    print "</body>";
   }
-  
-  print "</body>";
 
   return;
 }
