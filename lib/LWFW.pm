@@ -13,8 +13,14 @@ use JSON::XS qw(decode_json);
 use LWFW::Pod;
 use LWFW::Exceptions;
 use base qw/LWFW::Attributes LWFW::Plugins/;
-__PACKAGE__->mk_ro_accessors(qw/request context stash version pod/);
-__PACKAGE__->mk_accessors(qw/debug/);
+__PACKAGE__->mk_ro_accessors(qw/request
+                                context
+                                stash
+                                pod
+                                /);
+
+__PACKAGE__->mk_accessors(qw/debug
+                             version/);
 
 my $VERSION = '0.01';
 
@@ -116,6 +122,7 @@ sub forward {
       $handler = $self;
     }
     else {
+
       # Don't need to do this if internally forwarding with a module
       $orig_class = ref($self);
       $handler = bless $self, $handler_module;
@@ -131,6 +138,11 @@ sub forward {
     $self->_run_method($args{'method'});
   }
 
+  # If the caller is expecting something returned, return what's stored in stash,
+  # (for internal calls)
+  # ie:
+  #   my $result = $self->foward(...); # Result returned
+  #   $self->forward(...); # Result left in stash
   if (want('SCALAR')) {
     return delete $self->stash->{'result'};
   }
@@ -152,6 +164,8 @@ sub _run_method {
   my $method = shift || $self->context->method();
 
   if ($method) {
+    $self->log(method => $method);
+
     $method =~ s/\./_/;
     if ($self->_is_public_method($method)) {
       if (my $schema = $self->pod->get_schema(package => ref($self),
@@ -161,11 +175,13 @@ sub _run_method {
       return $self->$method($self->context());
     }
     else {
-      E::Invalid::Method->throw($method);
+      E::Invalid::Method->throw(error    => $method,
+                                err_code => '-32601' );
     }
   }
 
-  E::Invalid::Method->throw('No method given');
+  E::Invalid::Method->throw(error    => 'No method given',
+                            err_code => '-32601' );
 }
 
 =head2 validate_params
@@ -183,7 +199,8 @@ sub validate_params {
       validate($schema, $params);
     };
     if ($@) {
-      E::Invalid::Params->throw($@);
+      E::Invalid::Params->throw(error    => $@,
+                                err_code => '-32602');
     }
   }
 }
@@ -339,17 +356,33 @@ sub _error_handler {
   my ($self, $exception) = @_;
 
   if (ref($exception)) {
-    $self->stash->{'error'} = $exception->description() . ': ' .
-                                     $exception->error;
+    $self->log(level   => 'error',
+               message => $exception->time .
+                          ' :DEBUG INFO: ' .
+                          $exception->trace->as_string);
 
-    if ($self->debug()) {
-      warn $exception->time . ' :DEBUG INFO: ' . $exception->trace->as_string;
-                                 
-    }
+    my %error;
+    $error{'message'} = $exception->description() .
+                        ': ' .
+                        $exception->error;
+
+    $error{'err_code'} = $exception->err_code();
+    $self->stash->{'error'} =\%error;
   }
   else {
-    $self->stash->{'error'} = "Unknown error: $exception";
+    $self->stash->{'error'}->{'message'} = "Unknown error: $exception";
+    $self->log(level   => 'error',
+               message => "Unknown error: $exception");
   }
+}
+
+=head2 log
+
+  Handles logging
+
+=cut
+sub log {
+  my ($self, %args) = @_;
 }
 
 =head2 _init

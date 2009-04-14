@@ -49,21 +49,22 @@ sub _init {
       $content = $self->retrieve_json_from_get();
       last;
     };
-
-    # TODO die and exception handling
     warn ("Unable to handle request method '$_'");
   }
+
   if ($content) {
     if (my $json_request = $self->coder->decode($content)) {
-     # TODO Need to implement full validation.
-      return if not $json_request->{'jsonrpc'} eq '2.0';
+      if (not $json_request->{'jsonrpc'} eq '2.0') {
+        E::Invalid->throw(error => 'The received JSON not a valid JSON-RPC Request',
+                          err_code => '-32600');
+      }
       $self->{'json_request'} = $json_request;
+      return;
     }
   }
-  else {
-    # TODO die die die my darling. http://www.youtube.com/watch?v=4GIisWJJG28
-  }
 
+  E::Invalid->throw(error => 'Invalid JSON. An error occurred on the server while parsing the JSON text',
+                    err_code => '-32700');
 }
 
 =head2 method 
@@ -157,8 +158,8 @@ sub view {
   if (my $error = $self->framework->stash->{'error'}) {
     $rpcdata{'error'} = {
       name    => "JSONRPCError",
-      code    => "1000", # TODO
-      message => $error
+      code    => $error->{'err_code'},
+      message => $error->{'message'},
     };
   }
   else {

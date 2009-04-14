@@ -3,12 +3,13 @@ use strict;
 use warnings;
 
 use Exception::Class (
-      'E', # 'E' is euick to type and shouldn't have any name space clashes.
+      'E' => {
+        fields      => [ 'err_code' ],
+      }, # 'E' is quick to type and shouldn't have any name space clashes.
       'E::Fatal' => {
         isa         => 'E',
         description => 'Time to give up and go home',
       },
-      
       'E::Invalid' => {
         isa         => 'E',
         description => 'Something was done wrong',
@@ -39,6 +40,7 @@ use Exception::Class (
       'E::Service::LDAP' => {
         isa         => 'E::Service',
         description => 'Problem with LDAP',
+        fields      => [ 'mesg' ],
       },
 
 );
