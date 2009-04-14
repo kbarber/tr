@@ -38,7 +38,7 @@ $ENV{'SCRIPT_NAME'}    = "/";
 {
   my $test_json = '{
     "jsonrpc":"2.0",
-    "method":"_get_pod",
+    "method":"forward",
     "params":{
       "aparam":"testtext"
     },

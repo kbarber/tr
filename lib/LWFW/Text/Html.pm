@@ -1,6 +1,6 @@
 package LWFW::Text::Html;
-use strict;
-use warnings;
+use LWFW::Global;
+
 use Template;
 use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_ro_accessors(qw/framework request/);
@@ -71,7 +71,7 @@ sub view {
     my $path = $self->framework->_get_path_to_module(ref $self);
     if ($result->{'doc'}) {
       my $tt = Template->new(INCLUDE_PATH => $path);
-      $tt->process('doc.tmpl', $result)
+      $tt->process('html_doc.tmpl', $result)
         || warn $tt->error();
     }
     else {

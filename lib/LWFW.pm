@@ -1,23 +1,19 @@
 package LWFW;
-use strict;
-use warnings;
-use utf8;
+use LWFW::Global;
+
 use attributes;
-use feature ":5.10"; 
-use mro;  # 5.10...
 use Want;
 
 use CGI();
-use PPI();
-# use PPI::Cache path => '/var/cache/ppi-cache';
 
 # Schema validation support.
 use Kwalify qw(validate);
 use JSON::XS qw(decode_json);
 
+use LWFW::Pod;
 use LWFW::Exceptions;
 use base qw/LWFW::Attributes LWFW::Plugins/;
-__PACKAGE__->mk_ro_accessors(qw/request context stash version/);
+__PACKAGE__->mk_ro_accessors(qw/request context stash version pod/);
 __PACKAGE__->mk_accessors(qw/debug/);
 
 my $VERSION = '0.01';
@@ -45,10 +41,13 @@ sub new {
     $request = new CGI();
   }
 
+  my $pod = new LWFW::Pod;
+
   my $self = bless {
                version => $VERSION,
                stash   => {},
                request => $request,
+               pod     => $pod,
              }, $class;
 
   eval {
@@ -155,8 +154,8 @@ sub _run_method {
   if ($method) {
     $method =~ s/\./_/;
     if ($self->_is_public_method($method)) {
-      if (my $schema = $self->_get_schema(package => ref($self),
-                                          method  => $method)) {
+      if (my $schema = $self->pod->get_schema(package => ref($self),
+                                              method  => $method)) {
         $self->validate_params(schema => $schema);
       }
       return $self->$method($self->context());
@@ -253,8 +252,8 @@ sub system_doc :Global {
   if ($self->context) {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
-        if (my $pod = $self->_get_pod(package => ref($self),
-                                      method  => $params->{'show'})) {
+        if (my $pod = $self->pod->get_documentation(package => ref($self),
+                                                    method  => $params->{'show'})) {
           $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
           $self->stash->{'result'}->{'doc'}->{'poddoc'} = $pod;
           return;
@@ -316,103 +315,14 @@ sub system_schema :Global {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
         $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
-        if (my $pod = $self->_get_schema(package => ref($self),
-                                         method  => $params->{'show'})) {
+        if (my $pod = $self->pod->get_schema(package => ref($self),
+                                             method  => $params->{'show'})) {
           $self->stash->{'result'}->{'doc'}->{'schema'} = $pod;
         }
         else {
           $self->stash->{'result'}->{'doc'}->{'schema'} = 'No schema.';
         }
         return;
-      }
-    }
-  }
-
-  return;
-}
-
-
-=head2 _get_pod
- 
-  Grabs pod documentation for a given package/method.
-  Need to standardise on format so that it can be passed back
-  to a caller,
-  and that caller be able to present it any way it wants.
-
-  ie maybe pod like this:
-
-  head2 asub
-
-    Description:
-      blah
-
-    Example:
-      blah
-
-  cut
-
-  Could be returned as:
-
-  {
-    method      => asub,
-    params      => [a, b, c,],  # (From params attribute)
-    description => 'blah',
-    example     => 'blah',
-  }
-
-=cut
-sub _get_pod {
-  my ($self, %args) = @_;
-
-  return unless $args{'package'};
-  return unless $args{'method'};
-
-  my $module_dir = $self->_get_path_to_module($args{'package'});
-
-  if ($args{'package'} =~ /([^:]+)$/) {
-    my $document = PPI::Document->new($module_dir . $1 . '.pm') or die $!;
-    if (my $results = $document->find(sub {
-                                   $_[1]->isa('PPI::Token::Pod')
-                                   and ($_[1]->content =~ /=head2 $args{'method'}/) 
-                                 })) {
-      my $content = @$results[0]->content();
-      $content =~ s/=head2 $args{'method'}//m;
-      $content =~ s/=cut//m;
-      return $content;
-    }
-  }
-
-  return;
-}
-
-=head2 _get_schema
- 
-  Grab the schema for a method, lots of overlap with get_pod.
-  TODO: cleanup.
-
-=cut
-sub _get_schema {
-  my ($self, %args) = @_;
-
-  return unless $args{'package'};
-  return unless $args{'method'};
-
-  my $module_dir = $self->_get_path_to_module($args{'package'});
-
-  if ($args{'package'} =~ /([^:]+)$/) {
-    my $document = PPI::Document->new($module_dir . $1 . '.pm') or return;
-
-    if (my $results = $document->find(sub {
-                               $_[1]->isa('PPI::Statement::Sub')
-                               and ($_[1]->content =~ /sub $args{'method'}/) 
-                             })) {
-      my $method = @$results[0];
-      if (my $children = $method->find(sub {
-                                  $_[1]->isa('PPI::Token::Pod')
-                                  and ($_[1]->content =~ /=begin schema/) 
-                                  })) {
-        my ($schema) = @$children[0]->content() =~ /=begin schema(.+)=cut/ms;
-        return $schema;
       }
     }
   }

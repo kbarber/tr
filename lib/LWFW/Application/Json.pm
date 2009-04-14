@@ -1,8 +1,5 @@
 package LWFW::Application::Json;
-use strict;
-use warnings;
-use utf8;
-use feature ":5.10";
+use LWFW::Global;
 
 use JSON::XS;
 use base 'Class::Accessor::Fast';
@@ -41,17 +38,20 @@ sub _init {
   my $request = $self->framework->request;
 
   my $content;
-  given ($request->request_method()) {
-    when ('POST') {
-      $content = $self->retrieve_json_from_post()
-    }
-    when ('GET') {
-      $content = $self->retrieve_json_from_get()
-    }
-    default {
-      # TODO die and exception handling
-      warn ("Unable to handle request method '$_'");
-    }
+
+  # Code for perl < 5.10 and don't use a switch statement.
+  for ($request->request_method()) {
+    /POST/ && do {
+      $content = $self->retrieve_json_from_post();
+      last;
+    };
+    /GET/ && do {
+      $content = $self->retrieve_json_from_get();
+      last;
+    };
+
+    # TODO die and exception handling
+    warn ("Unable to handle request method '$_'");
   }
   if ($content) {
     if (my $json_request = $self->coder->decode($content)) {
