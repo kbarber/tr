@@ -1,5 +1,6 @@
 package LWFW;
 use LWFW::Global;
+use Module::Pluggable search_path => 'LWFW::Context', sub_name => 'context_handlers', instantiate => 'new';
 
 use attributes;
 use Want;
@@ -14,12 +15,12 @@ use LWFW::Pod;
 use LWFW::Exceptions;
 use base qw/LWFW::Attributes LWFW::Plugins/;
 __PACKAGE__->mk_ro_accessors(qw/request
-                                context
                                 stash
                                 pod
                                 /);
 
 __PACKAGE__->mk_accessors(qw/debug
+                             context
                              version/);
 
 my $VERSION = '0.01';
@@ -60,22 +61,20 @@ sub new {
     $self->_load_plugins();
     $self->_init();
 
-    # Have different handlers per content-type?
     my ($content_type) = $self->request->content_type() || 'text/html';
-    if ($content_type =~ m#([^/]+)/([^/]+)#) {
-      my $content_package = join('::', __PACKAGE__, ucfirst($1), ucfirst($2));
-      eval("use $content_package;
-            \$self->{'context'} = new $content_package(\$self)");
-      if ($@) {
-        E::Invalid::ContentType->throw($@);
-      }
+    foreach my $context ($self->context_handlers()) {
+      next unless $context->can('handles');
+      last if $context->handles(content_type => $content_type,
+                                framework    => $self);
     }
-    else {
+
+    if (not $self->context()) {
       E::Invalid::ContentType->throw("Don't know how to handle: " .
                                      $content_type);
     }
   };
   if ($@) {
+    warn "$@\n";
     $self->_error_handler($@);
   }
 

@@ -1,39 +1,55 @@
-package LWFW::Text::Html;
+package LWFW::Context::HTML;
 use LWFW::Global;
 
 use Template;
 use base 'Class::Accessor::Fast';
-__PACKAGE__->mk_ro_accessors(qw/framework request/);
+__PACKAGE__->mk_accessors(qw/framework/);
 
 =head2 new
 
-  Creates new LWFW::Text::Html object to handle html requests
+  Creates new LWFW::Context::HTML object to handle html requests
 
 =cut
 sub new {
   my $proto = shift;
   my($class) = ref $proto || $proto;
 
-  my $framework = shift or die 'No framework object passed';
-
-  my $self = bless {
-               framework => $framework,
-               request   => $framework->request(),
-             }, $class;
+  my $self = bless {}, $class;
 
   return $self;
+}
+
+=head2 handles
+
+ Called by framework to see if this module handles the current contact type.
+
+=cut
+sub handles {
+  my ($self, %args) = @_;
+
+  my @SUPPORTED_TYPES = ('Text/HTML');
+
+  foreach my $type (@SUPPORTED_TYPES) {
+    if ( lc($args{'content_type'}) eq lc($type)) {
+      $self->framework($args{'framework'});
+      # Set self as framework's current context
+      return $self->framework->context($self);
+    }
+  }
+
+  return;
 }
 
 =head2 method 
 
   grab the method from an html request
-      $data{$param} = $self->request->param($params);
+      $data{$param} = $self->framework->request->param($params);
 
 =cut
 sub method {
   my $self = shift;
 
-  if(my $method = $self->request->param('method')) {
+  if(my $method = $self->framework->request->param('method')) {
     return $method;
   }
 
@@ -48,7 +64,7 @@ sub method {
 sub params {
   my $self = shift;
 
-  if (my $params = $self->request->Vars()) {
+  if (my $params = $self->framework->request->Vars()) {
     my %data = %{$params};  # make a copy.
     delete $data{'method'}; # Remove method
     return \%data;
@@ -77,6 +93,12 @@ sub view {
     else {
       print Dumper $result;
     }
+  }
+  elsif (my $error = $self->framework->stash->{'error'}) {
+    my $path = $self->framework->_get_path_to_module(ref $self);
+    my $tt = Template->new(INCLUDE_PATH => $path);
+    $tt->process('html_error.tmpl', $error)
+      || warn $tt->error();
   }
   else {
     print "<html><head>\n";

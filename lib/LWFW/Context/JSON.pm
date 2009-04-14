@@ -1,9 +1,9 @@
-package LWFW::Application::Json;
+package LWFW::Context::JSON;
 use LWFW::Global;
 
-use JSON::XS;
 use base 'Class::Accessor::Fast';
-__PACKAGE__->mk_ro_accessors(qw/framework coder json_request/);
+__PACKAGE__->mk_ro_accessors(qw/coder json_request/);
+__PACKAGE__->mk_accessors(qw/framework/);
 
 =head2 new
 
@@ -14,17 +14,36 @@ sub new {
   my $proto = shift;
   my($class) = ref $proto || $proto;
 
-  my $framework = shift or die 'No framework object passed';
   my $coder = JSON::XS->new->utf8->pretty(1)->allow_nonref;
 
   my $self = bless {
-               framework => $framework,
+               framework => {},
                coder     => $coder,
              }, $class;
 
-  $self->_init();
-
   return $self;
+}
+
+=head2 handles
+
+ Called by framework to see if this module handles the current contact type.
+
+=cut
+sub handles {
+  my ($self, %args) = @_;
+
+  my @SUPPORTED_TYPES = ('Application/JSON');
+
+  foreach my $type (@SUPPORTED_TYPES) {
+    if ( lc($args{'content_type'}) eq lc($type)) {
+      $self->framework($args{'framework'});
+      $self->_init();
+      # Set self as framework's current context
+      return $self->framework->context($self);
+    }
+  }
+
+  return;
 }
 
 =head2 _init
@@ -61,10 +80,11 @@ sub _init {
       $self->{'json_request'} = $json_request;
       return;
     }
+  
+    E::Invalid->throw(error    => 'Invalid JSON. An error occurred on the server while parsing the JSON text',
+                      err_code => '-32700');
   }
 
-  E::Invalid->throw(error => 'Invalid JSON. An error occurred on the server while parsing the JSON text',
-                    err_code => '-32700');
 }
 
 =head2 method 
