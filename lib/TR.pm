@@ -18,10 +18,6 @@ use Want;
 
 use CGI::Simple;
 
-# Schema validation support.
-use Kwalify qw(validate);
-use JSON::XS qw(decode_json);
-
 use TR::Pod;
 use TR::Exceptions;
 use base qw/TR::Attributes Class::Accessor::Fast/;
@@ -34,7 +30,7 @@ __PACKAGE__->mk_accessors(qw/debug
                              context
                              version/);
 
-my $VERSION = '0.01';
+my $VERSION = '0.02';
 
 =head2 new
 
@@ -63,12 +59,15 @@ sub new {
              }, $class;
 
   if ($args{'config'}) {
-    $self->{'config'} = Config::Any->load_files({ files => [$args{'config'}] }) 
+    if (-f $args{'config'}) {
+      $self->{'config'} = Config::Any->load_files({ files => [$args{'config'}] }) ;
+    }
+    else {
+      die "Couldn't find config file: $args{'config'}";
+    }
   }
 
   eval {
-    $self->_init();
-
     foreach my $context ($self->context_handlers()) {
       next unless $context->can('handles');
       if ($context->handles(request => $request)) {
@@ -120,14 +119,9 @@ sub forward {
   my $handlers_by_path = $self->_get_handler_paths;
 
   if (my $handler = $handlers_by_path->{$path}) {
-    if (ref($self) eq $handler->{'package'}) {
-      $self->_run_method($args{'method'}, context => $self->context);
-    }
-    else {
-      if (my $new_control = $self->_get_controller(type => $handler->{'package'})) {
-        $new_control->_run_method($args{'method'}, context => $self->context);
-      }
-    }
+    $self->_run_method($args{'method'},
+                       package => $handler->{'package'},
+                       context => $self->context);
   }
   else {
     $self->_run_method($args{'method'}, context => $self->context);
@@ -153,7 +147,7 @@ sub forward {
 sub _get_controller {
   my ($self, %args) = @_;
 
-  foreach my $controller ($self->controllers({context => $self->context->request})) {
+  foreach my $controller ($self->controllers({context => $self->context})) {
     if (ref($controller) eq $args{'type'}) {
       return $controller;
     }
@@ -178,7 +172,14 @@ sub _run_method {
 
   if ($method) {
     $method =~ s/\./_/;
-    if ($self->_is_public_method($method)) {
+
+    my $control; 
+    
+    if (not $control = $self->_get_controller(type => $args{'package'})) {
+      $control = $self; # For now
+    }
+
+    if ($control->_is_public_method($method)) {
       # Hook to allow a plugins to run before a method has been called.
       foreach my $plugin ($self->plugins) {
         next unless $plugin->can('pre_method');
@@ -187,7 +188,7 @@ sub _run_method {
       }
 
       # Run the method
-      $self->$method();
+      $control->$method();
 
       # Hook to allow a plugins to run after a method has been called.
       foreach my $plugin ($self->plugins) {
@@ -390,16 +391,6 @@ sub _error_handler {
 =cut
 sub log {
   my ($self, %args) = @_;
-}
-
-=head2 _init
-
-  Override in modules.
-
-=cut
-sub _init {
-  my $self = shift;
-  $self->maybe::next::method(@_);
 }
 
 1;

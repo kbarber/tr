@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use Attribute::Handlers;
 
+use base 'Class::Accessor::Fast';
+
 =head2 UNIVERSAL::Params
 
   Handles the Params attribute when given to methods
