@@ -147,7 +147,12 @@ sub forward {
 sub _get_controller {
   my ($self, %args) = @_;
 
-  foreach my $controller ($self->controllers({context => $self->context})) {
+  return if not $args{'type'};
+
+  my @controllers = $self->controllers({context => $self->context,
+                                        config  => $self->config});
+
+  foreach my $controller (@controllers) {
     if (ref($controller) eq $args{'type'}) {
       return $controller;
     }

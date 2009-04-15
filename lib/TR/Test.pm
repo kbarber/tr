@@ -43,9 +43,19 @@ sub json_test {
 
   my $app;
 
-  eval("\$app = new $module(request => \$cgi)");
+  my %tr_args;
+  $tr_args{'request'} = $cgi;
+
+  # Ugly.. for now.
+  if ($ENV{'TR_CONFIG_FILE'}) {
+    $tr_args{'config'} = $ENV{'TR_CONFIG_FILE'};
+  }
+
+  # Try and create the new instance of TR
+  eval("\$app = new $module(\%tr_args)");
   if ($@) { die "Unable to run tests $@\n"; }
-  
+ 
+  # Capture output and time handler
   my $capture = IO::Capture::Stdout->new();
   $capture->start();
   my $t0 = [gettimeofday];
