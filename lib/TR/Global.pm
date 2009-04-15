@@ -1,4 +1,4 @@
-package LWFW::Global;
+package TR::Global;
 use strict;
 use warnings;
 use utf8;

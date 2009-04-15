@@ -1,4 +1,4 @@
-package LWFW::Attributes;
+package TR::Attributes;
 use strict;
 use warnings;
 use Attribute::Handlers;
@@ -16,7 +16,7 @@ sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
     return; # TODO: Maybe warn
   }
   else {
-    push @{$LWFW::method_schema{$package}{$referent}}, $data;
+    push @{$TR::method_schema{$package}{$referent}}, $data;
   }
 }
 
@@ -28,7 +28,7 @@ sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
 =cut
 sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  push @{$LWFW::attribute_cache{'Local'}{$package}{$referent}}, $attr;
+  push @{$TR::attribute_cache{'Local'}{$package}{$referent}}, $attr;
 }
 
 =head2 UNIVERSAL::Regex
@@ -39,7 +39,7 @@ sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
 =cut
 sub UNIVERSAL::Global :ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  push @{$LWFW::attribute_cache{'Global'}{$package}{$referent}}, $attr;
+  push @{$TR::attribute_cache{'Global'}{$package}{$referent}}, $attr;
 }
 
 =head2 _get_handler_paths
@@ -50,8 +50,8 @@ sub UNIVERSAL::Global :ATTR(CODE, BEGIN) {
 my %handlers;  # Only generate once.
 sub _get_handler_paths {
   return \%handlers if %handlers;
-  foreach my $package  (keys %{$LWFW::attribute_cache{'Local'}}) {
-    foreach my $code_ref (keys %{$LWFW::attribute_cache{'Local'}{$package}}) {
+  foreach my $package  (keys %{$TR::attribute_cache{'Local'}}) {
+    foreach my $code_ref (keys %{$TR::attribute_cache{'Local'}{$package}}) {
       my $method_name = _get_name_by_code_ref($package, $code_ref);
 
       # generate a path from package/method
@@ -107,14 +107,14 @@ sub _is_public_method {
 
   if (my $cv = $self->can($method)) {
     # Local
-    if (defined $LWFW::attribute_cache{'Local'}{$package} and
-        defined $LWFW::attribute_cache{'Local'}{$package}{$cv}) {
+    if (defined $TR::attribute_cache{'Local'}{$package} and
+        defined $TR::attribute_cache{'Local'}{$package}{$cv}) {
       return 1;
     }
     else {
     # Global
-      foreach my $pkg (keys %{$LWFW::attribute_cache{'Global'}}) {
-        if (defined $LWFW::attribute_cache{'Global'}{$pkg}{$cv}) {
+      foreach my $pkg (keys %{$TR::attribute_cache{'Global'}}) {
+        if (defined $TR::attribute_cache{'Global'}{$pkg}{$cv}) {
           return 1;
         }
       }

@@ -1,5 +1,5 @@
-package LWFW::Context::HTML;
-use LWFW::Global;
+package TR::Context::HTML;
+use TR::Global;
 
 use Template;
 use base 'Class::Accessor::Fast';
@@ -7,7 +7,7 @@ __PACKAGE__->mk_accessors(qw/framework/);
 
 =head2 new
 
-  Creates new LWFW::Context::HTML object to handle html requests
+  Creates new TR::Context::HTML object to handle html requests
 
 =cut
 sub new {

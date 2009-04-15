@@ -1,5 +1,5 @@
-package LWFW::Context::JSON;
-use LWFW::Global;
+package TR::Context::JSON;
+use TR::Global;
 
 use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
@@ -7,7 +7,7 @@ __PACKAGE__->mk_accessors(qw/framework/);
 
 =head2 new
 
-  Creates new LWFW::Application::Json object to handle application/json
+  Creates new TR::Application::Json object to handle application/json
 
 =cut
 sub new {

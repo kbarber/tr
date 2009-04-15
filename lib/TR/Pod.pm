@@ -1,10 +1,12 @@
-package LWFW::Pod;
-use LWFW::Global;
+package TR::Pod;
+use TR::Global;
 
 use PPI();
 # use PPI::Cache path => '/var/cache/ppi-cache';
-use base 'LWFW::Plugins';
+use base 'TR::Plugins';
 __PACKAGE__->mk_ro_accessors(qw/cached/);
+
+our $SINGLETON;
 
 =head2 new
 
@@ -15,12 +17,14 @@ sub new {
   my $proto = shift;
   my($class) = ref $proto || $proto;
 
-  my $self = bless {
+  return $SINGLETON if defined $SINGLETON;
+
+  $SINGLETON = bless {
                cached => {},
              }, $class;
 
 
-  return $self;
+  return $SINGLETON;
 }
 
 =head2 _fetch 

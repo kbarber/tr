@@ -1,12 +1,12 @@
-package LWFW::Plugins;
+package TR::Plugins;
 use strict;
 use warnings;
 use Cwd qw/realpath/;
 use File::Find qw/find/;
-use LWFW::Exceptions;
+use TR::Exceptions;
 
 use base 'Class::Accessor::Fast';
-$LWFW::Plugins::Loaded = 0;
+$TR::Plugins::Loaded = 0;
 
 =head2 _load_plugins
 
@@ -17,8 +17,8 @@ $LWFW::Plugins::Loaded = 0;
 sub _load_plugins {
   my $self = shift;
 
-  return if $LWFW::Plugins::Loaded; # Only attempt to load once.
-  $LWFW::Plugins::Loaded = 1;
+  return if $TR::Plugins::Loaded; # Only attempt to load once.
+  $TR::Plugins::Loaded = 1;
 
   my $module = shift || ref($self);
 

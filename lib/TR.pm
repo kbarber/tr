@@ -1,6 +1,12 @@
-package LWFW;
-use LWFW::Global;
-use Module::Pluggable search_path => 'LWFW::Context', sub_name => 'context_handlers', instantiate => 'new';
+package TR;
+use TR::Global;
+use Module::Pluggable search_path => 'TR::Context',
+                      sub_name    => 'context_handlers',
+                      instantiate => 'new';
+
+use Module::Pluggable search_path => 'TR::Plugins',
+                      sub_name    => 'plugins',
+                      instantiate => 'new';
 
 use attributes;
 use Want;
@@ -11,9 +17,9 @@ use CGI();
 use Kwalify qw(validate);
 use JSON::XS qw(decode_json);
 
-use LWFW::Pod;
-use LWFW::Exceptions;
-use base qw/LWFW::Attributes LWFW::Plugins/;
+use TR::Pod;
+use TR::Exceptions;
+use base qw/TR::Attributes TR::Plugins/;
 __PACKAGE__->mk_ro_accessors(qw/request
                                 stash
                                 pod
@@ -24,8 +30,6 @@ __PACKAGE__->mk_accessors(qw/debug
                              version/);
 
 my $VERSION = '0.01';
-
-use Data::Dumper;
 
 =head2 new
 
@@ -48,7 +52,7 @@ sub new {
     $request = new CGI();
   }
 
-  my $pod = new LWFW::Pod;
+  my $pod = new TR::Pod;
 
   my $self = bless {
                version => $VERSION,
@@ -58,7 +62,7 @@ sub new {
              }, $class;
 
   eval {
-    $self->_load_plugins();
+    $self->_load_plugins(); # TODO Deprecate
     $self->_init();
 
     my ($content_type) = $self->request->content_type() || 'text/html';
@@ -155,23 +159,32 @@ sub forward {
 
   Checks that it is a public method.
 
-  Maybe ACL/Audit hooks later.
-
 =cut
 sub _run_method {
   my $self   = shift;
   my $method = shift || $self->context->method();
 
   if ($method) {
-    $self->log(method => $method);
-
     $method =~ s/\./_/;
     if ($self->_is_public_method($method)) {
-      if (my $schema = $self->pod->get_schema(package => ref($self),
-                                              method  => $method)) {
-        $self->validate_params(schema => $schema);
+      # Hook to allow a plugins to run before a method has been called.
+      foreach my $plugin ($self->plugins) {
+        next unless $plugin->can('pre_method');
+        $plugin->pre_method(method    => $method,
+                            framework => $self);
       }
-      return $self->$method($self->context());
+
+      # Run the method
+      $self->$method();
+
+      # Hook to allow a plugins to run after a method has been called.
+      foreach my $plugin ($self->plugins) {
+        next unless $plugin->can('post_method');
+        $plugin->post_method(method    => $method,
+                             framework => $self);
+      }
+
+      return;
     }
     else {
       E::Invalid::Method->throw(error    => $method,
@@ -181,27 +194,6 @@ sub _run_method {
 
   E::Invalid::Method->throw(error    => 'No method given',
                             err_code => '-32601' );
-}
-
-=head2 validate_params
- 
-  Valids params with given schema.
-
-=cut
-sub validate_params {
-  my ($self, %args) = @_;
-
-  if ($args{'schema'}) {
-    my $schema = decode_json($args{'schema'});
-    my $params = $self->context->params();
-    eval {
-      validate($schema, $params);
-    };
-    if ($@) {
-      E::Invalid::Params->throw(error    => $@,
-                                err_code => '-32602');
-    }
-  }
 }
 
 =head2 system_version
