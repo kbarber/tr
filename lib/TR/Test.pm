@@ -41,7 +41,7 @@ sub json_test {
 
   my $app;
 
-  eval("\$app = new $module(\$cgi)");
+  eval("\$app = new $module(request => \$cgi)");
   if ($@) { die "Unable to run tests $@\n"; }
   
   my $capture = IO::Capture::Stdout->new();

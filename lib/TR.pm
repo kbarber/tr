@@ -12,6 +12,7 @@ use Module::Pluggable search_path => 'TR::C',
                       sub_name    => 'controllers',
                       instantiate => 'new';
 
+use Config::Any;
 use attributes;
 use Want;
 
@@ -26,6 +27,7 @@ use TR::Exceptions;
 use base qw/TR::Attributes Class::Accessor::Fast/;
 __PACKAGE__->mk_ro_accessors(qw/request
                                 stash
+                                config
                                 /);
 
 __PACKAGE__->mk_accessors(qw/debug
@@ -41,16 +43,16 @@ my $VERSION = '0.01';
 
   Example:
     PACKAGE->new();
-    PACKAGE->new($cgi_object);
-    PACKAGE->new($apache_request_object);
+    PACKAGE->new(request => $cgi_object);
+    PACKAGE->new(request => $apache_request_object);
 
 =cut
 sub new {
-  my $proto = shift;
-  my($class) = ref $proto || $proto;
+  my ($proto, %args) = @_;
+  my ($class) = ref $proto || $proto;
 
   # Either passed CGI object or Apache::Request
-  my $request = shift;
+  my $request = $args{'request'};
   if (not defined $request) {
     $request = new CGI();
   }
@@ -59,6 +61,10 @@ sub new {
                version => $VERSION,
                stash   => {},
              }, $class;
+
+  if ($args{'config'}) {
+    $self->{'config'} = Config::Any->load_files({ files => [$args{'config'}] }) 
+  }
 
   eval {
     $self->_init();
