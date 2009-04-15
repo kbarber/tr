@@ -7,11 +7,10 @@ use CGI;
 use lib "$Bin/../lib";
 use lib "$Bin";
 
-use Test::More tests => 7;
+use Test::More tests => 6;
 use TR::Test;
 
 use_ok('TR::Pod');
-use_ok('TR::Plugins');
 use_ok('TR');
 
 my $response = json_test('TR', uri => '/', method => 'testmethod', params => {aparam => 'test'});

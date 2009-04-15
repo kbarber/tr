@@ -3,7 +3,7 @@ use TR::Global;
 
 use Template;
 use base 'Class::Accessor::Fast';
-__PACKAGE__->mk_accessors(qw/framework/);
+__PACKAGE__->mk_accessors(qw/request/);
 
 =head2 new
 
@@ -21,7 +21,7 @@ sub new {
 
 =head2 handles
 
- Called by framework to see if this module handles the current contact type.
+ Called by TR to see if this module handles the current contact type.
 
 =cut
 sub handles {
@@ -29,11 +29,13 @@ sub handles {
 
   my @SUPPORTED_TYPES = ('Text/HTML');
 
+  my $request      = $args{'request'};
+  my $content_type = $request->content_type();
+
   foreach my $type (@SUPPORTED_TYPES) {
-    if ( lc($args{'content_type'}) eq lc($type)) {
-      $self->framework($args{'framework'});
-      # Set self as framework's current context
-      return $self->framework->context($self);
+    if ( lc($content_type) eq lc($type)) {
+      $self->request($request);
+      return $self;
     }
   }
 

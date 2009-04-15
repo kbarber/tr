@@ -8,6 +8,10 @@ use Module::Pluggable search_path => 'TR::Plugins',
                       sub_name    => 'plugins',
                       instantiate => 'new';
 
+use Module::Pluggable search_path => 'TR::C',
+                      sub_name    => 'controllers',
+                      instantiate => 'new';
+
 use attributes;
 use Want;
 
@@ -19,10 +23,9 @@ use JSON::XS qw(decode_json);
 
 use TR::Pod;
 use TR::Exceptions;
-use base qw/TR::Attributes TR::Plugins/;
+use base qw/TR::Attributes Class::Accessor::Fast/;
 __PACKAGE__->mk_ro_accessors(qw/request
                                 stash
-                                pod
                                 /);
 
 __PACKAGE__->mk_accessors(qw/debug
@@ -52,29 +55,25 @@ sub new {
     $request = new CGI();
   }
 
-  my $pod = new TR::Pod;
-
   my $self = bless {
                version => $VERSION,
                stash   => {},
-               request => $request,
-               pod     => $pod,
              }, $class;
 
   eval {
-    $self->_load_plugins(); # TODO Deprecate
     $self->_init();
 
-    my ($content_type) = $self->request->content_type() || 'text/html';
     foreach my $context ($self->context_handlers()) {
       next unless $context->can('handles');
-      last if $context->handles(content_type => $content_type,
-                                framework    => $self);
+      if ($context->handles(request => $request)) {
+        $self->context($context);
+        last;
+      };
     }
 
     if (not $self->context()) {
       E::Invalid::ContentType->throw("Don't know how to handle: " .
-                                     $content_type);
+                                     $request->content_type());
     }
   };
   if ($@) {
@@ -92,14 +91,14 @@ sub handler {
   my $self = shift;
 
   eval {
-    $self->forward($self->request->url(-absolute => 1));
+    $self->forward($self->context->request->url(-absolute => 1));
   };
   if ($@) {
     $self->_error_handler($@);
   }
 
   if ($self->context) {
-    $self->context->view();
+    $self->context->view($self->stash);
   }
 }
 
@@ -108,9 +107,6 @@ sub handler {
   Takes a path and works out whether to handle it or pass it off to another 
   module to handle.
 
-  Has some ugly reblessing hackery at the moment, going to restructure code
-  later :(
-
 =cut
 sub forward {
   my ($self, $path, %args) = @_;
@@ -118,36 +114,42 @@ sub forward {
   my $handlers_by_path = $self->_get_handler_paths;
 
   if (my $handler = $handlers_by_path->{$path}) {
-    my $handler_module = $handler->{'package'};
-
-    my ($handler, $orig_class);
-    if (ref($self) eq $handler_module) {
-      $handler = $self;
+    if (ref($self) eq $handler->{'package'}) {
+      $self->_run_method($args{'method'}, context => $self->context);
     }
     else {
-
-      # Don't need to do this if internally forwarding with a module
-      $orig_class = ref($self);
-      $handler = bless $self, $handler_module;
-      $handler->_init();
+      my $new_control = $self->get_controller(type => $handler->{'package'});
+      $new_control->_run_method($args{'method'}, context => $self->context);
     }
-    $handler->_run_method($args{'method'});
-    if ($orig_class) {
-      bless $self, $orig_class;
-    }
-
   }
   else {
-    $self->_run_method($args{'method'});
+    $self->_run_method($args{'method'}, context => $self->context);
   }
 
   # If the caller is expecting something returned, return what's stored in stash,
-  # (for internal calls)
+  # (for internal calls) TODO remove, this was just to copy tr.test's way.
   # ie:
   #   my $result = $self->foward(...); # Result returned
   #   $self->forward(...); # Result left in stash
   if (want('SCALAR')) {
     return delete $self->stash->{'result'};
+  }
+
+  return;
+}
+
+=head2
+  
+  Returns a controller matching given type
+
+=cut
+sub _get_controller {
+  my ($self, %args) = @_;
+
+  foreach my $controller ($self->controllers) {
+    if (ref($controller) eq $args{'type'}) {
+      return $controller;
+    }
   }
 
   return;
@@ -161,8 +163,11 @@ sub forward {
 
 =cut
 sub _run_method {
-  my $self   = shift;
-  my $method = shift || $self->context->method();
+  my ($self, $method, %args) = @_;
+
+  if (not $method) {
+    $method = $args{'context'}->method();
+  }
 
   if ($method) {
     $method =~ s/\./_/;
@@ -260,10 +265,12 @@ sub system_doc :Global {
   if ($self->context) {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
-        if (my $pod = $self->pod->get_documentation(package => ref($self),
-                                                    method  => $params->{'show'})) {
+        my $pod = new TR::Pod;
+
+        if (my $doc = $pod->get_documentation(package => ref($self),
+                                              method  => $params->{'show'})) {
           $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
-          $self->stash->{'result'}->{'doc'}->{'poddoc'} = $pod;
+          $self->stash->{'result'}->{'doc'}->{'poddoc'} = $doc;
           return;
         }
       }
@@ -323,9 +330,11 @@ sub system_schema :Global {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
         $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
-        if (my $pod = $self->pod->get_schema(package => ref($self),
-                                             method  => $params->{'show'})) {
-          $self->stash->{'result'}->{'doc'}->{'schema'} = $pod;
+
+        my $pod = new TR::Pod;
+        if (my $schema = $pod->get_schema(package => ref($self),
+                                          method  => $params->{'show'})) {
+          $self->stash->{'result'}->{'doc'}->{'schema'} = $schema;
         }
         else {
           $self->stash->{'result'}->{'doc'}->{'schema'} = 'No schema.';

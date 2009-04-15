@@ -2,7 +2,6 @@ package TR::Attributes;
 use strict;
 use warnings;
 use Attribute::Handlers;
-use Data::Dumper;
 
 =head2 UNIVERSAL::Params
 

@@ -3,7 +3,7 @@ use TR::Global;
 
 use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
-__PACKAGE__->mk_accessors(qw/framework/);
+__PACKAGE__->mk_accessors(qw/request/);
 
 =head2 new
 
@@ -17,8 +17,8 @@ sub new {
   my $coder = JSON::XS->new->utf8->pretty(1)->allow_nonref;
 
   my $self = bless {
-               framework => {},
-               coder     => $coder,
+               context => {},
+               coder   => $coder,
              }, $class;
 
   return $self;
@@ -26,7 +26,7 @@ sub new {
 
 =head2 handles
 
- Called by framework to see if this module handles the current contact type.
+ Called by TR to see if this module handles the current contact type.
 
 =cut
 sub handles {
@@ -34,12 +34,14 @@ sub handles {
 
   my @SUPPORTED_TYPES = ('Application/JSON');
 
+  my $request      = $args{'request'};
+  my $content_type = $request->content_type();
+
   foreach my $type (@SUPPORTED_TYPES) {
-    if ( lc($args{'content_type'}) eq lc($type)) {
-      $self->framework($args{'framework'});
+    if ( lc($content_type) eq lc($type)) {
+      $self->request($request);
       $self->_init();
-      # Set self as framework's current context
-      return $self->framework->context($self);
+      return $self;
     }
   }
 
@@ -54,7 +56,7 @@ sub handles {
 sub _init {
   my $self  = shift;
 
-  my $request = $self->framework->request;
+  my $request = $self->request;
 
   my $content;
 
@@ -144,7 +146,7 @@ sub set_params {
 sub retrieve_json_from_post {
   my $self = shift;
 
-  my $request = $self->framework->request();
+  my $request = $self->request();
   if (my $content = $request->param('POSTDATA')) {
     return $content;
   }
@@ -164,18 +166,19 @@ sub retrieve_json_from_get {
 
 =head2 view
 
-  Displays stash
+  Displays data
 
 =cut
 sub view {
   my $self = shift;
+  my $data = shift;
 
   print "Content-type: application/json\n\n";
 
   my %rpcdata;
   $rpcdata{'jsonrpc'} = '2.0';
 
-  if (my $error = $self->framework->stash->{'error'}) {
+  if (my $error = $data->{'error'}) {
     $rpcdata{'error'} = {
       name    => "JSONRPCError",
       code    => $error->{'err_code'},
@@ -183,7 +186,7 @@ sub view {
     };
   }
   else {
-    my $result = $self->framework->stash->{'result'};
+    my $result = $data->{'result'};
     $rpcdata{'result'} = $result;  
   }
   

@@ -3,7 +3,9 @@ use TR::Global;
 
 use PPI();
 # use PPI::Cache path => '/var/cache/ppi-cache';
-use base 'TR::Plugins';
+use Cwd qw/realpath/;
+
+use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_ro_accessors(qw/cached/);
 
 our $SINGLETON;
@@ -135,5 +137,29 @@ sub get_schema {
 
   return;
 }
+
+=head2 _get_path_to_module
+
+  Grab the path to a module and return it's realpath (.. ie get rid 
+                                                      of /../../ etc)/.
+
+=cut
+sub _get_path_to_module {
+  my $self   = shift;
+  my $module = shift || ref($self) || $self;
+
+  $module =~ s#::#/#g;
+  $module .= '.pm';
+  
+  if (defined $INC{$module}) {
+    my $path = realpath($INC{$module});
+    $path =~ s/[^\/]+\.pm//;
+    return $path;
+  }
+  else {
+    warn "Couldn't find path for $module\n";
+  }
+}
+
 
 1;
