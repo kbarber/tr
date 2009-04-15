@@ -19,22 +19,11 @@ for ldap live there.
 Handler
   Doc support.
   Hand off, support CGI and mod_perl so app can be run stand alone.
-  Make as similar to Catalyst as possible so we keep our future options
-  open?
-  People with exposure to catalyst will have less of a
-  learning curve.
   Have module per content-type, probaby handle input and output by per
-  content modules.
+  content modules (context)
 
 Think about:
   Auditing/Logging (easy to hook into _run_method)
   ACLs             (easy to hook into _run_method)
   Hooks?
 
-TODO:
-  Exception handling:
-    Remove ugly "returns" needed for Test::More, more to exceptions and
-    exception testing.
-
-  Not happy with content-type handling - modules should register what 
-  types they handle, rather than loading module based on content-type.
