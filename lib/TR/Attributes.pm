@@ -58,7 +58,7 @@ sub _get_handler_paths {
       # generate a path from package/method
       my $path = lc($package);
       $path =~ s#::#/#g;
-      $path =~ s#^[^/]+##; # Remove base package name
+      $path =~ s#^[^/]+/c##; # Remove base package name
 
       # Not happy about having this here at all, need to sort out
       # Attribute handling to work better.

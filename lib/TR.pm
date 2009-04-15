@@ -12,15 +12,15 @@ use Module::Pluggable search_path => 'TR::C',
                       sub_name    => 'controllers',
                       instantiate => 'new';
 
-use Config::Any;
 use attributes;
 use Want;
 
 use CGI::Simple;
 
 use TR::Pod;
+use TR::Config;
 use TR::Exceptions;
-use base qw/TR::Attributes Class::Accessor::Fast/;
+use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/request
                                 stash
                                 config
@@ -60,7 +60,7 @@ sub new {
 
   if ($args{'config'}) {
     if (-f $args{'config'}) {
-      $self->{'config'} = Config::Any->load_files({ files => [$args{'config'}] }) ;
+      $self->{'config'} = new TR::Config($args{'config'});
     }
     else {
       die "Couldn't find config file: $args{'config'}";
@@ -149,8 +149,8 @@ sub _get_controller {
 
   return if not $args{'type'};
 
-  my @controllers = $self->controllers({context => $self->context,
-                                        config  => $self->config});
+  my @controllers = $self->controllers(context => $self->context,
+                                       config  => $self->config);
 
   foreach my $controller (@controllers) {
     if (ref($controller) eq $args{'type'}) {
@@ -201,7 +201,6 @@ sub _run_method {
         $plugin->post_method(method    => $method,
                              framework => $self);
       }
-
       return;
     }
     else {
