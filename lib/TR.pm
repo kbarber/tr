@@ -16,7 +16,7 @@ use Config::Any;
 use attributes;
 use Want;
 
-use CGI();
+use CGI::Simple;
 
 # Schema validation support.
 use Kwalify qw(validate);
@@ -54,7 +54,7 @@ sub new {
   # Either passed CGI object or Apache::Request
   my $request = $args{'request'};
   if (not defined $request) {
-    $request = new CGI();
+    $request = new CGI::Simple;
   }
 
   my $self = bless {
@@ -124,8 +124,9 @@ sub forward {
       $self->_run_method($args{'method'}, context => $self->context);
     }
     else {
-      my $new_control = $self->get_controller(type => $handler->{'package'});
-      $new_control->_run_method($args{'method'}, context => $self->context);
+      if (my $new_control = $self->_get_controller(type => $handler->{'package'})) {
+        $new_control->_run_method($args{'method'}, context => $self->context);
+      }
     }
   }
   else {
@@ -152,7 +153,7 @@ sub forward {
 sub _get_controller {
   my ($self, %args) = @_;
 
-  foreach my $controller ($self->controllers) {
+  foreach my $controller ($self->controllers({context => $self->context->request})) {
     if (ref($controller) eq $args{'type'}) {
       return $controller;
     }

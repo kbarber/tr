@@ -4,7 +4,7 @@ use TR::Global;
 use CGI;
 use JSON::XS qw/encode_json/;
 use IO::Capture::Stdout;
-
+use Time::HiRes qw/gettimeofday tv_interval/;
 use base 'Exporter';
 our @EXPORT = qw/json_test/;
 no warnings 'redefine';
@@ -17,7 +17,9 @@ my $id = 0;
 
   ie:
   
-  json_test($app, uri => '/', method => 'testmethod', params => {..});
+  my $response = json_test($app, uri => '/', method => 'testmethod', params => {..});
+
+  my ($response, $time) = json_test($app, uri => '/', method => 'testmethod', params => {..});
 
 =cut
 sub json_test {
@@ -46,10 +48,13 @@ sub json_test {
   
   my $capture = IO::Capture::Stdout->new();
   $capture->start();
+  my $t0 = [gettimeofday];
   $app->handler();
+  my $elapsed = tv_interval ($t0);
   $capture->stop();
-  
-  return join('', $capture->read);
+
+  my $response = join('', $capture->read);
+  return wantarray ? ($response, $elapsed) : $response;
 }
 
 1;
