@@ -181,7 +181,22 @@ sub _run_method {
       }
 
       # Run the method
-      $control->$method();
+      eval {
+        $control->$method();
+      };
+
+      # Not sure about this way of redirecting between controllers...
+      # Seems wrong to raise an error to cause a redirect,
+      # but it was a quick fix till a nice way is done.. 
+      # maybe via attributes? sub createUser :Alias(/ldap/user)
+      my $e;
+      if ($e = Exception::Class->caught('E::Redirect')) {
+        $self->forward($e->newpath);
+      }
+      elsif ($e = Exception::Class->caught())  {
+        ref $e ? $e->rethrow : die $e;
+      }
+
 
       # Hook to allow a plugins to run after a method has been called.
       foreach my $plugin ($self->plugins) {

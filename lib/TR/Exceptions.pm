@@ -43,6 +43,11 @@ use Exception::Class (
         fields      => [ 'mesg' ],
       },
 
+      'E::Redirect' => {
+        isa         => 'E',
+        description => 'Handled by another controller.',
+        fields      => [ 'newpath' ],
+      },
 );
 
 
