@@ -191,7 +191,8 @@ sub _run_method {
       # maybe via attributes? sub createUser :Alias(/ldap/user)
       my $e;
       if ($e = Exception::Class->caught('E::Redirect')) {
-        $self->forward($e->newpath);
+        my $method = $e->method || $self->context->method();
+        $self->forward($e->newpath, method => $method);
       }
       elsif ($e = Exception::Class->caught())  {
         ref $e ? $e->rethrow : die $e;

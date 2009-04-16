@@ -46,7 +46,7 @@ use Exception::Class (
       'E::Redirect' => {
         isa         => 'E',
         description => 'Handled by another controller.',
-        fields      => [ 'newpath' ],
+        fields      => [ 'newpath', 'method' ],
       },
 );
 
