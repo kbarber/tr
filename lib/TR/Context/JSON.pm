@@ -1,51 +1,23 @@
 package TR::Context::JSON;
 use TR::Global;
 
-use base 'Class::Accessor::Fast';
+use base 'TR::Context';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
-__PACKAGE__->mk_accessors(qw/request/);
 
 =head2 new
 
-  Creates new TR::Application::Json object to handle application/json
+  Creates new TR::Context::JSON object
 
 =cut
 sub new {
   my $proto = shift;
   my($class) = ref $proto || $proto;
 
-  my $coder = JSON::XS->new->utf8->pretty(1)->allow_nonref;
-
   my $self = bless {
-               context => {},
-               coder   => $coder,
-             }, $class;
+    supported => ['Application/JSON'],
+  }, $class;
 
   return $self;
-}
-
-=head2 handles
-
- Called by TR to see if this module handles the current contact type.
-
-=cut
-sub handles {
-  my ($self, %args) = @_;
-
-  my @SUPPORTED_TYPES = ('Application/JSON');
-
-  my $request      = $args{'request'};
-  my $content_type = $request->content_type();
-
-  foreach my $type (@SUPPORTED_TYPES) {
-    if ( lc($content_type) eq lc($type)) {
-      $self->request($request);
-      $self->_init();
-      return $self;
-    }
-  }
-
-  return;
 }
 
 =head2 _init
@@ -58,9 +30,11 @@ sub _init {
 
   my $request = $self->request;
 
+  $self->{'coder'} = JSON::XS->new->utf8->pretty(1)->allow_nonref;
+
   my $content;
 
-  # Code for perl < 5.10 and don't use a switch statement.
+  # Code for perl < 5.10 - don't use a switch statement.
   for ($request->request_method()) {
     /POST/ && do {
       $content = $self->retrieve_json_from_post();
@@ -170,23 +144,22 @@ sub retrieve_json_from_get {
 
 =cut
 sub view {
-  my $self = shift;
-  my $data = shift;
+  my $self   = shift;
+  my $result = $self->result;
 
   print "Content-type: application/json\n\n";
 
   my %rpcdata;
   $rpcdata{'jsonrpc'} = '2.0';
 
-  if (my $error = $data->{'error'}) {
+  if (ref($result) eq 'HASH' && $result->{'error'}) {
+    my $error = $result->{'error'};
     $rpcdata{'error'} = {
       name    => "JSONRPCError",
-      code    => $error->{'err_code'},
-      message => $error->{'message'},
+      message => $error,
     };
   }
   else {
-    my $result = $data->{'result'};
     $rpcdata{'result'} = $result;  
   }
   

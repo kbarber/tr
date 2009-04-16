@@ -45,13 +45,12 @@ sub handles {
 =head2 method 
 
   grab the method from an html request
-      $data{$param} = $self->framework->request->param($params);
 
 =cut
 sub method {
   my $self = shift;
 
-  if(my $method = $self->framework->request->param('method')) {
+  if(my $method = $self->request->param('method')) {
     return $method;
   }
 
@@ -66,7 +65,7 @@ sub method {
 sub params {
   my $self = shift;
 
-  if (my $params = $self->framework->request->Vars()) {
+  if (my $params = $self->request->Vars()) {
     my %data = %{$params};  # make a copy.
     delete $data{'method'}; # Remove method
     return \%data;
@@ -85,7 +84,7 @@ sub view {
 
   print "Content-type: text/html\n\n";
 
-  if (my $result = $self->framework->stash->{'result'}) {
+  if (my $result = $self->result) {
     my $path = $self->framework->_get_path_to_module(ref $self);
     if ($result->{'doc'}) {
       my $tt = Template->new(INCLUDE_PATH => $path);

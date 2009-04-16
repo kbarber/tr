@@ -9,14 +9,16 @@ use JSON::XS qw(decode_json);
 
 use base 'Class::Accessor::Fast';
 
-sub pre_method {
+sub pre_method_hook {
   my ($self, %args) = @_;
 
   my $pod = new TR::Pod;
 
-  if (my $schema = $pod->get_schema(package => $args{'package'},
+  my $control = $args{'control'};
+
+  if (my $schema = $pod->get_schema(package => ref($control),
                                     method  => $args{'method'})) {
-    $self->_validate_params(schema => $schema, context => $args{'context'});
+    $self->_validate_params(schema => $schema, context => $control->context);
   }
 }
 

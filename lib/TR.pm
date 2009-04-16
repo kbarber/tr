@@ -22,9 +22,7 @@ use TR::Config;
 use TR::Exceptions;
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/request
-                                stash
-                                config
-                                /);
+                                config/);
 
 __PACKAGE__->mk_accessors(qw/debug
                              context
@@ -55,7 +53,6 @@ sub new {
 
   my $self = bless {
                version => $VERSION,
-               stash   => {},
              }, $class;
 
   if ($args{'config'}) {
@@ -103,7 +100,7 @@ sub handler {
   }
 
   if ($self->context) {
-    $self->context->view($self->stash);
+    $self->context->view();
   }
 }
 
@@ -120,20 +117,11 @@ sub forward {
 
   if (my $handler = $handlers_by_path->{$path}) {
     $self->_run_method($args{'method'},
-                       package => $handler->{'package'},
-                       context => $self->context);
+                       'package' => $handler->{'package'},
+                       context   => $self->context);
   }
   else {
     $self->_run_method($args{'method'}, context => $self->context);
-  }
-
-  # If the caller is expecting something returned, return what's stored in stash,
-  # (for internal calls) TODO remove, this was just to copy tr.test's way.
-  # ie:
-  #   my $result = $self->foward(...); # Result returned
-  #   $self->forward(...); # Result left in stash
-  if (want('SCALAR')) {
-    return delete $self->stash->{'result'};
   }
 
   return;
@@ -187,9 +175,9 @@ sub _run_method {
     if ($control->_is_public_method($method)) {
       # Hook to allow a plugins to run before a method has been called.
       foreach my $plugin ($self->plugins) {
-        next unless $plugin->can('pre_method');
-        $plugin->pre_method(method    => $method,
-                            framework => $self);
+        next unless $plugin->can('pre_method_hook');
+        $plugin->pre_method_hook(control => $control,
+                                 method  => $method);
       }
 
       # Run the method
@@ -197,9 +185,9 @@ sub _run_method {
 
       # Hook to allow a plugins to run after a method has been called.
       foreach my $plugin ($self->plugins) {
-        next unless $plugin->can('post_method');
-        $plugin->post_method(method    => $method,
-                             framework => $self);
+        next unless $plugin->can('post_method_hook');
+        $plugin->post_method_hook(control => $control,
+                                  method  => $method);
       }
       return;
     }
@@ -233,7 +221,7 @@ sub _run_method {
 sub system_version :Global {
   my $self = shift;
 
-  $self->stash->{'result'} = {version => $self->version};
+  $self->context->result({version => $self->version});
 
   return;
 }
@@ -271,7 +259,7 @@ sub system_doc :Global {
 
   my $self = shift;
 
-  $self->stash->{'result'}->{'doc'}->{'version'} = $self->version;
+  $self->context->result({doc => {version => $self->version}});
 
   # See if documentation for a specific method was wanted
   if ($self->context) {
@@ -279,10 +267,10 @@ sub system_doc :Global {
       if ($self->_is_public_method($params->{'show'})) {
         my $pod = new TR::Pod;
 
-        if (my $doc = $pod->get_documentation(package => ref($self),
-                                              method  => $params->{'show'})) {
-          $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
-          $self->stash->{'result'}->{'doc'}->{'poddoc'} = $doc;
+        if (my $doc = $pod->get_documentation('package' => ref($self),
+                                              method    => $params->{'show'})) {
+          $self->context->result({doc => {method => $params->{'show'}}});
+          $self->context->result({doc => {poddoc => $doc}});
           return;
         }
       }
@@ -300,7 +288,7 @@ sub system_doc :Global {
     }
     $result{$path} = $methods;
   }
-  $self->stash->{'result'}->{'doc'}->{'paths'} = \%result;
+  $self->context->result({doc => {paths => \%result}});
 }
 
 =head2 system_schema
@@ -336,20 +324,20 @@ sub system_schema :Global {
 
   my $self = shift;
 
-  $self->stash->{'result'}->{'doc'}->{'version'} = $self->version;
+  $self->context->result(doc => {version => $self->version});
 
   if ($self->context) {
     if (my $params = $self->context->params()) {
       if ($self->_is_public_method($params->{'show'})) {
-        $self->stash->{'result'}->{'doc'}->{'method'} = $params->{'show'};
+        $self->context->result(doc => {method => $params->{'show'}});
 
         my $pod = new TR::Pod;
-        if (my $schema = $pod->get_schema(package => ref($self),
-                                          method  => $params->{'show'})) {
-          $self->stash->{'result'}->{'doc'}->{'schema'} = $schema;
+        if (my $schema = $pod->get_schema('package' => ref($self),
+                                          method    => $params->{'show'})) {
+          $self->context->result(doc => {schema => $schema});
         }
         else {
-          $self->stash->{'result'}->{'doc'}->{'schema'} = 'No schema.';
+          $self->context->result(doc => {schema => 'No schema.'});
         }
         return;
       }
@@ -379,10 +367,10 @@ sub _error_handler {
                         $exception->error;
 
     $error{'err_code'} = $exception->err_code();
-    $self->stash->{'error'} =\%error;
+    $self->context->result({error => \%error});
   }
   else {
-    $self->stash->{'error'}->{'message'} = "Unknown error: $exception";
+    $self->context->result({error => "Unknown error: $exception"});
     $self->log(level   => 'error',
                message => "Unknown error: $exception");
   }
