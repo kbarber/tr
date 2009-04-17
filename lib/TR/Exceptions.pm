@@ -37,11 +37,6 @@ use Exception::Class (
         isa         => 'E',
         description => 'Problem with talking to a remote service',
       },
-      'E::Service::LDAP' => {
-        isa         => 'E::Service',
-        description => 'Problem with LDAP',
-        fields      => [ 'mesg' ],
-      },
 
       'E::Redirect' => {
         isa         => 'E',

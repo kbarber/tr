@@ -22,6 +22,9 @@ Handler
   Have module per content-type, probaby handle input and output by per
   content modules (context)
 
+  Maybe context should really be thought about as a transaction, handling
+  in/out and being able to rollback later?
+
 Think about:
   Auditing/Logging (easy to hook into _run_method)
   ACLs             (easy to hook into _run_method)

@@ -28,7 +28,7 @@ __PACKAGE__->mk_accessors(qw/debug
                              context
                              version/);
 
-my $VERSION = '0.02';
+my $VERSION = '0.03';
 
 =head2 new
 
@@ -380,7 +380,9 @@ sub _error_handler {
     my %error;
     $error{'message'} = $exception->description() .
                         ': ' .
-                        $exception->error;
+                        $exception->error .
+                        ': ' .
+                        $exception->trace->as_string;
 
     $error{'err_code'} = $exception->err_code();
     $self->context->result({error => \%error});
