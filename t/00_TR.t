@@ -22,8 +22,8 @@ $response = json_test('TR', uri => '/', method => 'system.version');
 like($response, qr/"version"/, 'Can get version');
 
 ($response, $time) = json_test('TR', uri => '/', method => 'system.doc', params => { show => 'system_schema' });
-like($response, qr/"version"/, "Can show doc for system_schema method ($time seconds)");
+like($response, qr/"poddoc"/, "Can show doc for system_schema method ($time seconds)");
 
 ($response, $time) = json_test('TR', uri => '/', method => 'system.schema', params => { show => 'system_doc' });
-like($response, qr/"version"/, "Can show schema for system_doc method ($time seconds)");
+like($response, qr/"schema"/, "Can show schema for system_doc method ($time seconds)");
 
