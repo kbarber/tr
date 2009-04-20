@@ -86,6 +86,9 @@ sub new {
     $self->_error_handler($@);
   }
 
+  # This preloads the controllers so we know what paths are handled
+  $self->_get_controller(type => 'TR');
+
   return $self;
 }
 
@@ -118,10 +121,6 @@ sub forward {
 
   my $handlers_by_path = $self->_get_handler_paths;
 
-  # This preloads the controllers so we know what paths are handled
-  # plus gives us our default controller.
-  my $default = $self->_get_controller(type => 'TR::C::System');
-
   if (my $handler = $handlers_by_path->{$path}) {
     $self->_run_method($args{'method'},
                        'package' => $handler->{'package'},
@@ -129,7 +128,7 @@ sub forward {
   }
   else {
     $self->_run_method($args{'method'},
-                       'package' => ref($default),
+                       'package' => 'TR::C::System',
                        context   => $self->context);
   }
 
