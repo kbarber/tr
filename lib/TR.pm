@@ -19,19 +19,19 @@ use attributes;
 use Want;
 
 use CGI::Simple;
+use Log::Log4perl;
 
 use TR::Pod;
 use TR::Config;
 use TR::Exceptions;
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/request
-                                config
-                                _error_log_fh/);
+                                config/);
 
 __PACKAGE__->mk_accessors(qw/debug
                              context
                              version
-                             _error_log_fh/);
+                             log/);
 
 my $VERSION = '0.03';
 
@@ -69,12 +69,25 @@ sub new {
     }
 
     if (my $log_config = $self->config->{'log'}) {
-      if (my $error_file = $log_config->{'error'}) {
-        my $fh;
-        open $fh, '>>', $error_file || die $!;
-        print $fh 'TR started:' . localtime() . "\n";
-        $self->_error_log_fh($fh);
+      Log::Log4perl->init($log_config);
+      if (my $logger = Log::Log4perl->get_logger()) {
+        $self->log($logger);
       }
+    }
+  }
+
+  if (not $self->log) {
+    Log::Log4perl->init(\q{
+      log4perl.rootLogger=ERROR, LOGFILE   
+
+      log4perl.appender.LOGFILE=Log::Log4perl::Appender::ScreenColoredLevels
+      log4perl.appender.LOGFILE.mode=append
+    
+      log4perl.appender.LOGFILE.layout=PatternLayout
+      log4perl.appender.LOGFILE.layout.ConversionPattern=[%d] %m%n
+    });
+    if (my $logger = Log::Log4perl->get_logger()) {
+      $self->log($logger);
     }
   }
 
@@ -245,12 +258,11 @@ sub _error_handler {
   my ($self, $exception) = @_;
 
   if (ref($exception)) {
-    $self->log(level   => 'error',
-               message => localtime($exception->time) .
-                          " : " .
-                          $exception->description() .
-                          ' :DEBUG INFO: ' .
-                          $exception->trace->as_string);
+    $self->log->error($exception->description() .
+                      ' : ' .
+                      $exception->error() .
+                      ' : ' .
+                      $exception->trace->as_string);
 
     my %error;
     $error{'message'} = $exception->description() .
@@ -262,23 +274,7 @@ sub _error_handler {
   }
   else {
     $self->context->result({error => "Unknown error: $exception"});
-    $self->log(level   => 'error',
-               message => "Unknown error: $exception");
-  }
-}
-
-=head2 log
-  
-  Log to file if $config->log
-
-=cut
-sub log {
-  my ($self, %args) = @_;
-
-  if (my $log = $self->_error_log_fh) {
-  }
-  else {
-    warn $args{'message'};
+    $self->log->error("Unknown error: $exception");
   }
 }
 
