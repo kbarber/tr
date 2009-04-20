@@ -12,6 +12,9 @@ use Module::Pluggable search_path => 'TR::C',
                       sub_name    => 'controllers',
                       instantiate => 'new';
 
+# TODO Split this into handler and default control object.
+#      Move error handling to context.
+
 use attributes;
 use Want;
 
@@ -91,7 +94,7 @@ sub new {
 =cut
 sub handler {
   my $self = shift;
-
+  
   eval {
     $self->forward($self->context->request->url(-absolute => 1));
   };
@@ -114,6 +117,10 @@ sub forward {
   my ($self, $path, %args) = @_;
 
   my $handlers_by_path = $self->_get_handler_paths;
+
+  # This preloads the controllers so we know what paths are handled
+  # plus gives us our default controller.
+  my $controller = $self->_get_controller(type => 'TR::C::System');
 
   if (my $handler = $handlers_by_path->{$path}) {
     $self->_run_method($args{'method'},
@@ -296,6 +303,8 @@ sub system_doc :Global {
   # Else display list of available methods
   my %result;
   my $handlers = $self->_get_handler_paths();
+  use Data::Dumper;
+  warn Dumper $handlers;
   foreach my $path (keys %{$handlers}) {
     my $methods = $handlers->{$path}{'methods'};
     my $package = $handlers->{$path}{'package'};

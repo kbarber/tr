@@ -84,7 +84,7 @@ sub get_documentation {
   return unless $args{'package'};
   return unless $args{'method'};
 
-  my $module_dir = $self->_get_path_to_module($args{'package'});
+  my $module_dir = $self->get_path_to_module($args{'package'});
 
   if ($args{'package'} =~ /([^:]+)$/) {
     my $document = $self->_fetch(module_file => $module_dir . $1 . '.pm');
@@ -115,7 +115,7 @@ sub get_schema {
   return unless $args{'package'};
   return unless $args{'method'};
 
-  my $module_dir = $self->_get_path_to_module($args{'package'});
+  my $module_dir = $self->get_path_to_module($args{'package'});
 
   if ($args{'package'} =~ /([^:]+)$/) {
     my $document = $self->_fetch(module_file => $module_dir . $1 . '.pm');
@@ -138,13 +138,13 @@ sub get_schema {
   return;
 }
 
-=head2 _get_path_to_module
+=head2 get_path_to_module
 
   Grab the path to a module and return it's realpath (.. ie get rid 
                                                       of /../../ etc)/.
 
 =cut
-sub _get_path_to_module {
+sub get_path_to_module {
   my $self   = shift;
   my $module = shift || ref($self) || $self;
 

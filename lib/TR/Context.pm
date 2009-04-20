@@ -17,7 +17,7 @@ sub handles {
   return unless $supported_types;
 
   my $request      = $args{'request'};
-  my $content_type = $request->content_type();
+  my $content_type = $request->content_type() || 'text/html';
 
   foreach my $type (@{$supported_types}) {
     if ( lc($content_type) eq lc($type)) {
@@ -66,6 +66,9 @@ sub _merge_hash {
       $a->{$key} = $b->{$key};
     }
   }
+}
+
+sub _init {
 }
 
 1;

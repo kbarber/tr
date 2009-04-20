@@ -9,6 +9,11 @@ use JSON::XS qw(decode_json);
 
 use base 'Class::Accessor::Fast';
 
+=head2 pre_method_hook 
+
+  Validates params with schema before method is run.
+
+=cut
 sub pre_method_hook {
   my ($self, %args) = @_;
 
@@ -20,11 +25,14 @@ sub pre_method_hook {
                                     method  => $args{'method'})) {
     $self->_validate_params(schema => $schema, context => $control->context);
   }
+
+  return;
 }
 
 =head2 _validate_params
  
-  Valids params with given schema.
+  Valids params with given schema,
+  throws an exception if they don't validate correctly..
 
 =cut
 sub _validate_params {
@@ -33,6 +41,7 @@ sub _validate_params {
   if ($args{'schema'}) {
     my $schema = decode_json($args{'schema'});
     my $params = $args{'context'}->params();
+
     eval {
       validate($schema, $params);
     };
@@ -41,6 +50,8 @@ sub _validate_params {
                                 err_code => '-32602');
     }
   }
+
+  return;
 }
 
 1;

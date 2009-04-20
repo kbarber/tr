@@ -1,7 +1,7 @@
 package TR::Test;
 use TR::Global;
 
-use CGI;
+use CGI::Simple;
 use JSON::XS qw/encode_json/;
 use IO::Capture::Stdout;
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -39,7 +39,7 @@ sub json_test {
   my $test_json = encode_json $test_data;
   
   $ENV{'CONTENT_LENGTH'} = length($test_json);
-  my $cgi = new CGI({POSTDATA => $test_json});
+  my $cgi = new CGI::Simple({POSTDATA => $test_json});
 
   my $app;
 
