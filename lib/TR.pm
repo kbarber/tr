@@ -25,11 +25,13 @@ use TR::Config;
 use TR::Exceptions;
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/request
-                                config/);
+                                config
+                                _error_log_fh/);
 
 __PACKAGE__->mk_accessors(qw/debug
                              context
-                             version/);
+                             version
+                             _error_log_fh/);
 
 my $VERSION = '0.03';
 
@@ -64,6 +66,15 @@ sub new {
     }
     else {
       die "Couldn't find config file: $args{'config'}";
+    }
+
+    if (my $log_config = $self->config->{'log'}) {
+      if (my $error_file = $log_config->{'error'}) {
+        my $fh;
+        open $fh, '>>', $error_file || die $!;
+        print $fh 'TR started:' . localtime() . "\n";
+        $self->_error_log_fh($fh);
+      }
     }
   }
 
@@ -235,16 +246,16 @@ sub _error_handler {
 
   if (ref($exception)) {
     $self->log(level   => 'error',
-               message => $exception->time .
+               message => localtime($exception->time) .
+                          " : " .
+                          $exception->description() .
                           ' :DEBUG INFO: ' .
                           $exception->trace->as_string);
 
     my %error;
     $error{'message'} = $exception->description() .
                         ': ' .
-                        $exception->error .
-                        ': ' .
-                        $exception->trace->as_string;
+                        $exception->error;
 
     $error{'err_code'} = $exception->err_code();
     $self->context->result({error => \%error});
@@ -257,12 +268,18 @@ sub _error_handler {
 }
 
 =head2 log
-
-  Handles logging
+  
+  Log to file if $config->log
 
 =cut
 sub log {
   my ($self, %args) = @_;
+
+  if (my $log = $self->_error_log_fh) {
+  }
+  else {
+    warn $args{'message'};
+  }
 }
 
 1;
