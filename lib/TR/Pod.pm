@@ -103,17 +103,18 @@ sub get_documentation {
   return;
 }
 
-=head2 get_schema
- 
-  Grab the schema for a method, lots of overlap with get_pod.
-  TODO: cleanup.
+=head2 _get_from_pod
+  
+  Looks for through pod for given "match" for method.
+  TODO: lots of overlap with get_documentation need to refactor
 
 =cut
-sub get_schema {
+sub _get_from_pod {
   my ($self, %args) = @_;
 
   return unless $args{'package'};
   return unless $args{'method'};
+  return unless $args{'match'};
 
   my $module_dir = $self->get_path_to_module($args{'package'});
 
@@ -127,9 +128,9 @@ sub get_schema {
       my $method = @$results[0];
       if (my $children = $method->find(sub {
                                   $_[1]->isa('PPI::Token::Pod')
-                                  and ($_[1]->content =~ /=begin schema/) 
+                                  and ($_[1]->content =~ /$args{'match'}/) 
                                   })) {
-        my ($schema) = @$children[0]->content() =~ /=begin schema(.+)=cut/ms;
+        my ($schema) = @$children[0]->content() =~ /$args{'match'}(.+)=cut/ms;
         return $schema;
       }
     }
@@ -137,6 +138,36 @@ sub get_schema {
 
   return;
 }
+
+
+=head2 get_schema
+ 
+  Grab the schema for a method.
+
+=cut
+sub get_schema {
+  my ($self, %args) = @_;
+
+  return unless $args{'package'};
+  return unless $args{'method'};
+
+  return $self->_get_from_pod(%args, match => '=begin schema');
+}
+
+=head2 get_result_schema
+ 
+  Grab the result schema for a method.
+
+=cut
+sub get_result_schema {
+  my ($self, %args) = @_;
+
+  return unless $args{'package'};
+  return unless $args{'method'};
+
+  return $self->_get_from_pod(%args, match => '=begin result_schema');
+}
+
 
 =head2 get_path_to_module
 

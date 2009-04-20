@@ -20,14 +20,38 @@ sub pre_method_hook {
   my $pod = new TR::Pod;
 
   my $control = $args{'control'};
+  my $params = $control->context->params();
 
   if (my $schema = $pod->get_schema(package => ref($control),
                                     method  => $args{'method'})) {
-    $self->_validate_params(schema => $schema, context => $control->context);
+    $self->_validate_params(schema => $schema, data => $params);
   }
 
   return;
 }
+
+=head2 post_method_hook 
+
+  Validates result with schema (if given).
+
+=cut
+sub post_method_hook {
+  my ($self, %args) = @_;
+
+  my $pod = new TR::Pod;
+
+  my $control = $args{'control'};
+  my $result = $control->context->result();
+
+  if (my $schema = $pod->get_result_schema(package => ref($control),
+                                           method  => $args{'method'})) {
+    $self->_validate_params(schema => $schema,
+                            data   => $result);
+  }
+
+  return;
+}
+
 
 =head2 _validate_params
  
@@ -40,10 +64,9 @@ sub _validate_params {
 
   if ($args{'schema'}) {
     my $schema = decode_json($args{'schema'});
-    my $params = $args{'context'}->params();
 
     eval {
-      validate($schema, $params);
+      validate($schema, $args{'data'});
     };
     if ($@) {
       E::Invalid::Params->throw(error    => $@,
