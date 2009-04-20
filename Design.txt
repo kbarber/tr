@@ -25,8 +25,13 @@ Handler
   Maybe context should really be thought about as a transaction, handling
   in/out and being able to rollback later?
 
-Think about:
-  Auditing/Logging (easy to hook into _run_method)
-  ACLs             (easy to hook into _run_method)
-  Hooks?
-
+Example log4perl conf
+----------------------------------------------------------------------
+log4perl.rootLogger=ERROR, LOGFILE
+   
+log4perl.appender.LOGFILE=Log::Log4perl::Appender::File
+log4perl.appender.LOGFILE.filename=/var/log/TR/error.log
+log4perl.appender.LOGFILE.mode=append
+    
+log4perl.appender.LOGFILE.layout=PatternLayout
+log4perl.appender.LOGFILE.layout.ConversionPattern=[%d] %m%n

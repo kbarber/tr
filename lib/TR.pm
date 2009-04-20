@@ -69,7 +69,7 @@ sub new {
     }
 
     if (my $log_config = $self->config->{'log'}) {
-      Log::Log4perl->init($log_config);
+      Log::Log4perl->init($log_config->{'conf'});
       if (my $logger = Log::Log4perl->get_logger()) {
         $self->log($logger);
       }
