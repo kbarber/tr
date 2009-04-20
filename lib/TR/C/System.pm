@@ -66,7 +66,6 @@ sub system_schema :Global {
         }
         else {
           $self->context->result(doc => {schema => 'No schema.'});
-        warn "No schema " . $params->{'show'} . " : " . ref($self) . "\n";
         }
         return;
       }
