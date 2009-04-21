@@ -1,5 +1,5 @@
 package TR::Log;
-use TR::Global;
+use TR::Standard;
 
 use Log::Log4perl;
 

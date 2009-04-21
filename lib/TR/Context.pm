@@ -1,5 +1,5 @@
 package TR::Context;
-use TR::Global;
+use TR::Standard;
 
 use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_accessors(qw/supported request/);

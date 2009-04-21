@@ -1,8 +1,8 @@
 package TR::Pod;
-use TR::Global;
+use TR::Standard;
 
-use PPI();
-# use PPI::Cache path => '/var/cache/ppi-cache';
+#use PPI();
+use PPI::Cache path => '/var/cache/ppi-cache';
 use Cwd qw/realpath/;
 
 use base 'Class::Accessor::Fast';

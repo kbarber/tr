@@ -1,5 +1,5 @@
 package TR::Context::JSON;
-use TR::Global;
+use TR::Standard;
 
 use base 'TR::Context';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);

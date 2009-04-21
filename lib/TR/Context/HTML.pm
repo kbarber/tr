@@ -1,5 +1,5 @@
 package TR::Context::HTML;
-use TR::Global;
+use TR::Standard;
 use TR::Pod; # For get_path_to_module :(
 
 use Template;

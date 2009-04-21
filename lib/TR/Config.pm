@@ -1,5 +1,5 @@
 package TR::Config;
-use TR::Global;
+use TR::Standard;
 
 use Config::Any::JSON;
 

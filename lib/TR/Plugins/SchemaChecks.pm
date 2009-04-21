@@ -1,5 +1,5 @@
 package TR::Plugins::SchemaChecks;
-use TR::Global;
+use TR::Standard;
 use TR::Exceptions;
 use TR::Pod;
 

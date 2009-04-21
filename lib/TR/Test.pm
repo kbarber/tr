@@ -1,5 +1,5 @@
 package TR::Test;
-use TR::Global;
+use TR::Standard;
 
 use CGI::Simple;
 use JSON::XS qw/encode_json/;

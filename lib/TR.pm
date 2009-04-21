@@ -1,5 +1,5 @@
 package TR;
-use TR::Global;
+use TR::Standard;
 use Module::Pluggable search_path => 'TR::Context',
                       sub_name    => 'context_handlers',
                       instantiate => 'new';

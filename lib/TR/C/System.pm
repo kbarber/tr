@@ -1,5 +1,5 @@
 package TR::C::System;
-use TR::Global;
+use TR::Standard;
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/context config version/);
 

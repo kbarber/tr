@@ -1,4 +1,4 @@
-package TR::Global;
+package TR::Standard;
 use strict;
 use warnings;
 use utf8;
