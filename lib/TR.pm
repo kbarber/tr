@@ -16,7 +16,6 @@ use Module::Pluggable search_path => 'TR::C',
 #      Move error handling to context.
 
 use attributes;
-use Want;
 
 use CGI::Simple;
 use Log::Log4perl;
