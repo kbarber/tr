@@ -16,8 +16,9 @@ sub handles {
 
   return unless $supported_types;
 
-  my $request      = $args{'request'};
-  my $content_type = $request->content_type() || 'text/html';
+  my $request = $args{'request'};
+ 
+  my $content_type = $request->content_type();;
 
   foreach my $type (@{$supported_types}) {
     if ( lc($content_type) eq lc($type)) {

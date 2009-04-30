@@ -45,12 +45,11 @@ sub method {
 sub params {
   my $self = shift;
 
-  if (my %params = $self->request->Vars()) {
-    delete $params{'method'};
-    return \%params;
-  }
+  my %params = $self->request->params();
 
-  return;
+  delete $params{'method'}; # remove method as it's not needed/wanted.
+
+  return \%params;
 }
 
 =head2 view

@@ -35,7 +35,8 @@ sub _init {
   my $content;
 
   # Code for perl < 5.10 - don't use a switch statement.
-  for ($request->request_method()) {
+
+  for ($request->request_method) {
     /POST/ && do {
       $content = $self->retrieve_json_from_post();
       last;
@@ -120,10 +121,10 @@ sub set_params {
 sub retrieve_json_from_post {
   my $self = shift;
 
-  my $request = $self->request();
-  if (my $content = $request->param('POSTDATA')) {
+  if (my $content = $self->request->postdata()) {
     return $content;
-  }
+  } 
+
   return;
 }
 

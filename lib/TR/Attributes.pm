@@ -102,7 +102,7 @@ sub _get_name_by_code_ref {
 =cut
 sub _is_public_method {
   my $self   = shift;
-  my $method = shift;
+  my $method = shift || return;
 
   my $package = ref($self);
 

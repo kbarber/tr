@@ -12,17 +12,17 @@ use Module::Pluggable search_path => 'TR::C',
                       sub_name    => 'controllers',
                       instantiate => 'new';
 
-# TODO Split this into handler and default control object.
-#      Move error handling to context.
+# TODO Move error handling to context.
 
 use attributes;
 
-use CGI::Simple;
 use Log::Log4perl;
 
 use TR::Pod;
 use TR::Config;
 use TR::Exceptions;
+use TR::Request;
+
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/request
                                 config/);
@@ -49,11 +49,7 @@ sub new {
   my ($proto, %args) = @_;
   my ($class) = ref $proto || $proto;
 
-  # Either passed CGI object or Apache::Request
-  my $request = $args{'request'};
-  if (not defined $request) {
-    $request = new CGI::Simple;
-  }
+  my $request = new TR::Request(%args);
 
   my $self = bless {
                version => $VERSION,
@@ -67,6 +63,7 @@ sub new {
       die "Couldn't find config file: $args{'config'}";
     }
 
+    # Try and see if logging is configured.
     if (my $log_config = $self->config->{'log'}) {
       Log::Log4perl->init($log_config->{'conf'});
       if (my $logger = Log::Log4perl->get_logger()) {
@@ -75,6 +72,7 @@ sub new {
     }
   }
 
+  # Default logging setup.
   if (not $self->log) {
     Log::Log4perl->init(\q{
       log4perl.rootLogger=ERROR, LOGFILE   
@@ -110,7 +108,7 @@ sub new {
   }
 
   # This preloads the controllers so we know what paths are handled
-  $self->_get_controller(type => 'TR');
+  $self->_get_controller(type => 'Whoknows');
 
   return $self;
 }
@@ -122,7 +120,7 @@ sub handler {
   my $self = shift;
   
   eval {
-    $self->forward($self->context->request->url(-absolute => 1));
+    $self->forward($self->context->request->uri());
   };
   if ($@) {
     $self->_error_handler($@);
@@ -256,6 +254,7 @@ sub _run_method {
 sub _error_handler {
   my ($self, $exception) = @_;
 
+  warn $exception;
   if (ref($exception)) {
     $self->log->error($exception->description() .
                       ' : ' .
