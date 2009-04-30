@@ -1,13 +1,16 @@
 package TR::ModPerl2;
 use TR::Standard; 
   
-use Apache2::RequestRec ();
-use Apache2::RequestIO ();
-use Apache2::Request (); 
+use Apache2::RequestRec;
+use Apache2::RequestIO;
+use Apache2::RequestUtil; 
+use Apache2::Request; 
 use Apache2::Const -compile => qw(OK);
 use TR;
 
 =head2 handler
+
+    PerlSetVar config /home/knoxc/Projects/TR.perl/config/registry.conf 
 
     <Location />
 	      SetHandler perl-script
@@ -24,7 +27,7 @@ sub handler {
   my $request = new Apache2::Request($r);
 
   my $tr = new TR(request => $request,
-                  config => '/home/knoxc/Projects/TR.perl/config/registry.conf');
+                  config => $r->dir_config('config'));
   $tr->handler();
 
   return Apache2::Const::OK;
