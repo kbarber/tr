@@ -1,7 +1,6 @@
 package TR::Pod;
 use TR::Standard;
 
-#use PPI();
 use PPI::Cache path => '/var/cache/ppi-cache';
 use Cwd qw/realpath/;
 

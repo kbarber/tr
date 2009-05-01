@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use utf8;
 use attributes;
-use mro;
 
 =head2 import 
 
@@ -20,7 +19,6 @@ sub import {
   warnings->import();
   strict->import();
   utf8->import();
-  mro::set_mro( scalar caller(), 'c3' );
 }
 
 1;

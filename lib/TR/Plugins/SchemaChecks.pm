@@ -3,7 +3,10 @@ use TR::Standard;
 use TR::Exceptions;
 use TR::Pod;
 
-# Schema validation support.
+# Schema validation support. 
+# Permance:  We take a big hit doing schemas this way:
+#   Requests per second:    56.76  with
+#   Requests per second:    124.39 without
 use Kwalify qw(validate);
 use JSON::XS qw(decode_json);
 

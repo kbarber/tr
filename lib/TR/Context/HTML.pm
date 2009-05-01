@@ -78,7 +78,10 @@ sub view {
           || warn $tt->error();
       }
       else {
+        print "<html><body><pre>";
+        local $Data::Dumper::Terse = 1;
         print Dumper $result;
+        print "</pre></body></html>";
       }
     }
   }
