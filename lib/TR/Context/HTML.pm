@@ -5,6 +5,7 @@ use TR::Pod; # For get_path_to_module :(
 use Template;
 use Data::Dumper;
 use base 'TR::Context';
+__PACKAGE__->mk_accessors(qw/_params/);
 
 =head2 new
 
@@ -37,6 +38,17 @@ sub method {
   return;
 }
 
+=head2 set_params
+
+  Sets a param
+
+=cut
+sub set_params {
+  my $self   = shift;
+  my %new_params = @_;
+  $self->_params(\%new_params);
+}
+
 =head2 params
 
   Grabs params from request
@@ -45,11 +57,14 @@ sub method {
 sub params {
   my $self = shift;
 
-  my %params = $self->request->params();
+  if (not $self->_params) {
+    my %params = $self->request->params();
 
-  delete $params{'method'}; # remove method as it's not needed/wanted.
+    delete $params{'method'}; # remove method as it's not needed/wanted.
+    $self->_params(\%params);
+  }
 
-  return \%params;
+  return $self->_params;
 }
 
 =head2 view

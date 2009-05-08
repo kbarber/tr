@@ -5,6 +5,7 @@ use PPI::Cache path => '/var/cache/ppi-cache';
 use Cwd qw/realpath/;
 
 use base 'Class::Accessor::Fast';
+
 __PACKAGE__->mk_ro_accessors(qw/cached/);
 
 our $SINGLETON;
