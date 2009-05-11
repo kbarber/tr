@@ -94,8 +94,8 @@ sub get_documentation {
                                    and ($_[1]->content =~ /=head2 $args{'method'}/) 
                                  })) {
       my $content = @$results[0]->content();
-      $content =~ s/=head2 $args{'method'}//m;
-      $content =~ s/=cut//m;
+      $content =~ s/=head2 $args{'method'}\n//m;
+      $content =~ s/\n=cut//m;
       return $content;
     }
   }

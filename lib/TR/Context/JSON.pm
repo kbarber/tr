@@ -1,5 +1,7 @@
 package TR::Context::JSON;
 use TR::Standard;
+use Kwalify qw(validate);
+use JSON::XS;
 
 use base 'TR::Context';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
@@ -50,10 +52,27 @@ sub _init {
 
   if ($content) {
     if (my $json_request = $self->coder->decode($content)) {
-      if (not $json_request->{'jsonrpc'} eq '2.0') {
-        E::Invalid->throw(error => 'The received JSON not a valid JSON-RPC Request',
+
+      my $json_rpc_schema = $self->coder->decode('
+        {
+          "type": "map",
+          "require": true,
+          "mapping": {
+            "jsonrpc": { "type": "float", "enum": ["2.0"], "required": true },
+            "method":  { "type": "str", "required": true },
+            "params": { "type": "any", "required": false },
+            "id": { "type": "int", "required": false }
+          }
+        }');
+
+      eval {
+        validate($json_rpc_schema, $json_request);
+      };
+      if ($@) {
+        E::Invalid->throw(error => "The received JSON not a valid JSON-RPC Request: $@",
                           err_code => '-32600');
       }
+
       $self->{'json_request'} = $json_request;
       return;
     }

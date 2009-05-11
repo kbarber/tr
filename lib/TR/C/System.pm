@@ -1,5 +1,6 @@
 package TR::C::System;
 use TR::Standard;
+use TR::Pod;
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/context config version/);
 

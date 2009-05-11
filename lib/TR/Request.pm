@@ -68,6 +68,26 @@ sub request_method {
   return $request_type;
 }
 
+=head2 request_time
+
+  Returns the request_time if possible.
+
+=cut
+sub request_time {
+  my $self = shift;
+
+  my $request_time;
+  if ($self->req->can('request_time')) {
+    $request_time = $self->req->request_time(); # mod_perl
+  }
+  else {
+    # TODO: Work out if we can get request time from CGI::Simple etc.
+    $request_time = time;
+  }
+
+  return $request_time;
+}
+
 =head2 postdata
 
   Returns raw POST data.
@@ -79,7 +99,7 @@ sub postdata {
   if (my $content = $self->req->param('POSTDATA')) {
     return $content;
   }
-  elsif ($self->req->can('read')){  # Mod_perl
+  elsif ($self->req->can('read')){  # mod_perl
     $self->req->read($content, $self->req->headers_in->get('Content-length'));
     return $content;
   } 
