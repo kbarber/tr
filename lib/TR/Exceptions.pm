@@ -14,6 +14,10 @@ use Exception::Class (
         isa         => 'E',
         description => 'Something was done wrong',
       },
+      'E::Invalid::Config' => {
+        isa         => 'E::Invalid',
+        description => 'Something is wrong with the configuration',
+      },
       'E::Invalid::Params' => {
         isa         => 'E::Invalid',
         description => 'Method was passed wrong params',

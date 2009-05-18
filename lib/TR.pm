@@ -65,7 +65,7 @@ sub new {
 
     # Try and see if logging is configured.
     if (my $log_config = $self->config->{'log'}) {
-      Log::Log4perl->init($log_config->{'conf'});
+      Log::Log4perl->init_once($log_config->{'conf'});
       if (my $logger = Log::Log4perl->get_logger()) {
         $self->log($logger);
       }
@@ -256,16 +256,19 @@ sub _error_handler {
 
   warn $exception;
   if (ref($exception)) {
-    $self->log->error($exception->description() .
+    my %error;
+    $error{'message'} = $exception->description() .
+                        ': ' .
+                        $exception->error;
+
+    $self->log->error($error{'message'});
+
+    $self->log->debug($exception->description() .
                       ' : ' .
                       $exception->error() .
                       ' : ' .
                       $exception->trace->as_string);
 
-    my %error;
-    $error{'message'} = $exception->description() .
-                        ': ' .
-                        $exception->error;
 
     $error{'err_code'} = $exception->err_code();
     $self->context->result({error => \%error});

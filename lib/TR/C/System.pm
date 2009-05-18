@@ -1,8 +1,9 @@
 package TR::C::System;
 use TR::Standard;
 use TR::Pod;
+
 use base 'TR::Attributes';
-__PACKAGE__->mk_ro_accessors(qw/context config version/);
+__PACKAGE__->mk_ro_accessors(qw/context config version log/);
 
 my $VERSION = '0.04';
 
@@ -12,6 +13,7 @@ sub new {
 
   my $self = bless \%args, $class;
   $self->{'version'} = $VERSION;
+  $self->{'log'} = Log::Log4perl->get_logger();
   $self->_init();
 
   return $self;

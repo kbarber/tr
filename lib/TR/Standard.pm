@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use utf8;
 use attributes;
+use Log::Log4perl;
 
 =head2 import 
 
@@ -19,6 +20,7 @@ sub import {
   warnings->import();
   strict->import();
   utf8->import();
+  Log::Log4perl->import();
 }
 
 1;

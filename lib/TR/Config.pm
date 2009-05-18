@@ -2,6 +2,7 @@ package TR::Config;
 use TR::Standard;
 
 use Config::Any::JSON;
+# use Config::Multi; Should split the config into multi files and use this
 
 my %INSTANCES;
 

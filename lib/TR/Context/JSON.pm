@@ -190,4 +190,13 @@ sub view {
   print $self->coder->encode(\%rpcdata);
 }
 
+=head2 error_handler
+
+  Handling errors is context specific really, so move it out of TR into context.
+
+=cut
+sub error_handler {
+  my ($self, $error) = @_;
+}
+
 1;
