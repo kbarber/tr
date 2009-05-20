@@ -274,7 +274,7 @@ sub _error_handler {
     $self->context->result({error => \%error});
   }
   else {
-    $self->context->result({error => "Unknown error: $exception"});
+    $self->context->result({error => "Unknown error"});
     $self->log->error("Unknown error: $exception");
   }
 }

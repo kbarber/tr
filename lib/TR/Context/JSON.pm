@@ -1,7 +1,7 @@
 package TR::Context::JSON;
 use TR::Standard;
 use Kwalify qw(validate);
-use JSON::XS;
+use JSON::XS '2.2';
 
 use base 'TR::Context';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
