@@ -64,7 +64,7 @@ sub system_schema :Global {
 
         my $pod = new TR::Pod;
         if (my $schema = $pod->get_schema('package' => ref($self),
-                                          method    => $params->{'show'})) {
+                                          'method'  => $params->{'show'})) {
           $self->context->result(doc => {schema => $schema});
         }
         else {
