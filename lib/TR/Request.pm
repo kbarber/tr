@@ -141,6 +141,46 @@ sub param {
   return $self->req->param(@_);
 }
 
+=head2 rpc_path 
+
+  Returns the part of the URI minus location,
+  ie http://server/t/foo/bar
+
+  will return
+  /foo/bar
+
+=cut
+sub rpc_path {
+  my $self = shift;
+
+  my $uri = $self->uri();
+  my $location = $self->location();
+
+  $uri =~ s/$location//;
+  
+  return $uri;
+}
+
+=head2 location 
+
+  Returns the base location.
+
+=cut
+sub location {
+  my $self = shift;
+
+  if ($self->req->can('location')) {
+    return $self->req->location();
+  }
+  elsif ($self->uri =~ m#/t#) { # TODO Hacky..
+    return '/t'; # Get from config?
+  }
+  else {
+    return '';
+  }
+
+}
+
 =head2 uri
 
   Returns the URI

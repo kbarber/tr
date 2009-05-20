@@ -120,7 +120,7 @@ sub handler {
   my $self = shift;
   
   eval {
-    $self->forward($self->context->request->uri());
+    $self->forward($self->context->request->rpc_path());
   };
   if ($@) {
     $self->_error_handler($@);

@@ -36,8 +36,8 @@
       <li><span class="toctext">[% path.key %]</span></li>
       <ul>
       [% FOREACH method IN path.value -%]
-        <li><a href="[% path.key %]?method=system.doc&show=[% method %]">[% method %]</a>
-        <a href="[% path.key %]?method=system.schema&show=[% method %]">(schema)</a></li>
+        <li><a href="[% location %][% path.key %]?method=system.doc&show=[% method %]">[% method %]</a>
+        <a href="[% location %][% path.key %]?method=system.schema&show=[% method %]">(schema)</a></li>
       [% END %]
       </ul>
     </ul>

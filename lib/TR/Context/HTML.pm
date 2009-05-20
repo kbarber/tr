@@ -81,6 +81,7 @@ sub view {
   my $path = $pod->get_path_to_module(ref $self);
 
   if (my $result = $self->result) {
+    $result->{'location'} = $self->request->location();
     if (ref($result) eq 'HASH' && $result->{'error'}) {
       my $tt = Template->new(INCLUDE_PATH => $path);
       $tt->process('html_error.tmpl', $result)
