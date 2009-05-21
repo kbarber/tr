@@ -26,7 +26,10 @@ use Exception::Class (
         isa         => 'E::Invalid',
         description => 'Method is unsupported',
       },
-
+      'E::Invalid::Result' => {
+        isa         => 'E::Invalid',
+        description => 'Method returned unexpected result',
+      },
       'E::Invalid::ContentType' => {
         isa         => 'E::Invalid',
         description => 'Unhandled content-type',

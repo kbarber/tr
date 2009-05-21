@@ -1,5 +1,6 @@
 package TR::Config;
 use TR::Standard;
+use TR::Exceptions;
 
 use Config::Any::JSON;
 # use Config::Multi; Should split the config into multi files and use this
@@ -13,7 +14,14 @@ sub new {
   # Only instantiate one instance per file.
   return $INSTANCES{$file} if $INSTANCES{$file};
 
-  my $self = Config::Any::JSON->load($file) ;
+  my $self;
+  eval {
+    $self = Config::Any::JSON->load($file);
+  };
+  if ($@) {
+    E::Invalid::Config->throw($@);
+  }
+
   bless $self, $class;
 
   $INSTANCES{$file} = $self;

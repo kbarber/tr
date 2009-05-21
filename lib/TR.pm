@@ -60,7 +60,7 @@ sub new {
       $self->{'config'} = new TR::Config($args{'config'});
     }
     else {
-      die "Couldn't find config file: $args{'config'}";
+      E::Invalid::Config->throw("Couldn't find config file: $args{'config'}");
     }
 
     # Try and see if logging is configured.
@@ -103,7 +103,6 @@ sub new {
     }
   };
   if ($@) {
-    warn "$@\n";
     $self->_error_handler($@);
   }
 
