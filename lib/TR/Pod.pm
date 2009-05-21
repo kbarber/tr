@@ -1,14 +1,13 @@
 package TR::Pod;
 use TR::Standard;
 
-use PPI::Cache path => '/var/cache/ppi-cache';
+use PPI;
+use Cache::FastMmap;
 use Cwd qw/realpath/;
 
 use base 'Class::Accessor::Fast';
 
-__PACKAGE__->mk_ro_accessors(qw/cached/);
-
-our $SINGLETON;
+__PACKAGE__->mk_accessors(qw/schema_cache rschema_cache/);
 
 =head2 new
 
@@ -19,14 +18,29 @@ sub new {
   my $proto = shift;
   my($class) = ref $proto || $proto;
 
-  return $SINGLETON if defined $SINGLETON;
+  my $self = bless {}, $class;
 
-  $SINGLETON = bless {
-               cached => {},
-             }, $class;
+  my $schema_cache =  new Cache::FastMmap(share_file      => '/var/cache/tr/TR_schema.cache.' . $<,
+                                          cache_not_found => 1,
+                                          page_size       => '4k',  # Most schemas are smaller than 1k
+                                          num_pages       => '157', # Max pages, should be prime.
+                                          context         => $self,
+                                          read_cb         => sub { $_[0]->_get_schema($_[1]) }, # Fetch schema on cache miss
+                                          expire_time     => '1h',
+                                         );
+  my $rschema_cache = new Cache::FastMmap(share_file      => '/var/cache/tr/TR_rschema.cache.' . $<,
+                                          cache_not_found => 1,
+                                          page_size       => '4k',  # Most schemas are smaller than 1k
+                                          num_pages       => '157', # Max pages, should be prime.
+                                          context         => $self,
+                                          read_cb         => sub { $_[0]->_get_result_schema($_[1]) }, # Fetch schema on cache miss
+                                          expire_time     => '1h',
+                                         );
 
+  $self->schema_cache($schema_cache);
+  $self->rschema_cache($rschema_cache);
 
-  return $SINGLETON;
+  return $self;
 }
 
 =head2 _fetch 
@@ -40,11 +54,7 @@ sub _fetch {
 
   my $module = $args{'module_file'} or die 'Need to pass module_file';
 
-  return $self->cached->{$module} if $self->cached->{$module};
-
   my $document = PPI::Document->new($module) or die $!;
-
-  $self->cached->{$module} = $document;
 
   return $document;
 }
@@ -94,8 +104,8 @@ sub get_documentation {
                                    and ($_[1]->content =~ /=head2 $args{'method'}/) 
                                  })) {
       my $content = @$results[0]->content();
-      $content =~ s/=head2 $args{'method'}\n//m;
-      $content =~ s/\n=cut//m;
+      $content =~ s/=head2 $args{'method'}//m;
+      $content =~ s/=cut//m;
       return $content;
     }
   }
@@ -142,7 +152,7 @@ sub _get_from_pod {
 
 =head2 get_schema
  
-  Grab the schema for a method.
+  Grab the schema for a method from cache
 
 =cut
 sub get_schema {
@@ -151,7 +161,20 @@ sub get_schema {
   return unless $args{'package'};
   return unless $args{'method'};
 
-  return $self->_get_from_pod(%args, match => '=begin schema');
+  return $self->schema_cache->get(join(':', $args{'package'}, $args{'method'}));
+}
+
+=head2 _get_schema 
+
+  Call on cache miss to fetch schema from perl module.
+
+=cut
+sub _get_schema {
+  my ($self, $key) = @_;
+
+  $key =~ /^(.*):([^:]+$)/;
+
+  return $self->_get_from_pod(package => $1, method => $2, match => '=begin schema');
 }
 
 =head2 get_result_schema
@@ -165,9 +188,21 @@ sub get_result_schema {
   return unless $args{'package'};
   return unless $args{'method'};
 
-  return $self->_get_from_pod(%args, match => '=begin result_schema');
+  return $self->rschema_cache->get(join(':', $args{'package'}, $args{'method'}));
 }
 
+=head2 _get_result_schema 
+
+  Call on cache miss to fetch result schema from perl module.
+
+=cut
+sub _get_result_schema {
+  my ($self, $key) = @_;
+
+  $key =~ /^(.*):([^:]+$)/;
+
+  return $self->_get_from_pod(package => $1, method => $2, match => '=begin result_schema');
+}
 
 =head2 get_path_to_module
 
