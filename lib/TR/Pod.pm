@@ -9,12 +9,16 @@ use base 'Class::Accessor::Fast';
 
 __PACKAGE__->mk_accessors(qw/schema_cache rschema_cache/);
 
+my $SINGLETON;
+
 =head2 new
 
   Init pod module
 
 =cut
 sub new {
+  return $SINGLETON if $SINGLETON;
+
   my $proto = shift;
   my($class) = ref $proto || $proto;
 
@@ -39,6 +43,8 @@ sub new {
 
   $self->schema_cache($schema_cache);
   $self->rschema_cache($rschema_cache);
+
+  $SINGLETON = $self;
 
   return $self;
 }
