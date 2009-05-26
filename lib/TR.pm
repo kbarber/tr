@@ -1,14 +1,17 @@
 package TR;
 use TR::Standard;
 use Module::Pluggable search_path => 'TR::Context',
+                      inner       => 0,
                       sub_name    => 'context_handlers',
                       instantiate => 'new';
 
 use Module::Pluggable search_path => 'TR::Plugins',
+                      inner       => 0,
                       sub_name    => 'plugins',
                       instantiate => 'new';
 
 use Module::Pluggable search_path => 'TR::C',
+                      inner       => 0,
                       sub_name    => 'controllers',
                       instantiate => 'new';
 
