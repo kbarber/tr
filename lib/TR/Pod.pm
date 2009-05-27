@@ -180,7 +180,7 @@ sub _get_schema {
   my ($self, $key) = @_;
 
   if ($key =~ /^(.*):([^:]+$)/x) {
-    return $self->_get_from_pod(package => $1, method => $2, match => '=begin schema');
+    return $self->_get_from_pod(package => $1, method => $2, match => '=begin\ schema');
   }
 
   return;
@@ -209,7 +209,7 @@ sub _get_result_schema {
   my ($self, $key) = @_;
 
   if ($key =~ /^(.*):([^:]+$)/x) {
-    return $self->_get_from_pod(package => $1, method => $2, match => '=begin result_schema');
+    return $self->_get_from_pod(package => $1, method => $2, match => '=begin\ result_schema');
   }
 
   return;
