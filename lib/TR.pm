@@ -1,5 +1,7 @@
 package TR;
 use TR::Standard;
+use English;
+
 use Module::Pluggable search_path => 'TR::Context',
                       inner       => 0,
                       sub_name    => 'context_handlers',
@@ -35,7 +37,7 @@ __PACKAGE__->mk_accessors(qw/debug
                              version
                              log/);
 
-my $VERSION = '0.03';
+my $VERSION = '0.06';
 
 =head2 new
 
@@ -77,7 +79,8 @@ sub new {
 
   # Default logging setup.
   if (not $self->log) {
-    Log::Log4perl->init(\q{
+    ## no critic
+    Log::Log4perl->init(\qq{
       log4perl.rootLogger=ERROR, LOGFILE   
 
       log4perl.appender.LOGFILE=Log::Log4perl::Appender::ScreenColoredLevels
@@ -85,7 +88,7 @@ sub new {
     
       log4perl.appender.LOGFILE.layout=PatternLayout
       log4perl.appender.LOGFILE.layout.ConversionPattern=[%d] %m%n
-    });
+      });
     if (my $logger = Log::Log4perl->get_logger()) {
       $self->log($logger);
     }
@@ -104,10 +107,11 @@ sub new {
       E::Invalid::ContentType->throw("Don't know how to handle: " .
                                      $request->content_type());
     }
-  };
-  if ($@) {
-    $self->_error_handler($@);
+    1
   }
+  or do {
+    $self->_error_handler($EVAL_ERROR);
+  };
 
   # This preloads the controllers so we know what paths are handled
   $self->_get_controller(type => 'Whoknows');
@@ -123,14 +127,17 @@ sub handler {
   
   eval {
     $self->forward($self->context->request->rpc_path());
-  };
-  if ($@) {
-    $self->_error_handler($@);
+    1;
   }
+  or do {
+    $self->_error_handler($EVAL_ERROR);
+  };
 
   if ($self->context) {
     $self->context->view();
   }
+
+  return;
 }
 
 =head2 forward
@@ -195,7 +202,7 @@ sub _run_method {
   }
 
   if ($method) {
-    $method =~ s/\./_/;
+    $method =~ s/\./_/x;
 
     my $control; 
     
@@ -214,20 +221,22 @@ sub _run_method {
       # Run the method
       eval {
         $control->$method();
+        1;
+      }
+      or do {
+        # Not sure about this way of redirecting between controllers...
+        # Seems wrong to raise an error to cause a redirect,
+        # but it was a quick fix till a nice way is done.. 
+        # maybe via attributes? sub createUser :Alias(/ldap/user)
+        my $e;
+        if ($e = Exception::Class->caught('E::Redirect')) {
+          my $method = $e->method || $self->context->method();
+          $self->forward($e->newpath, method => $method);
+        }
+        elsif ($e = Exception::Class->caught())  {
+          ref $e ? $e->rethrow : E::Fatal->throw($e);
+        }
       };
-
-      # Not sure about this way of redirecting between controllers...
-      # Seems wrong to raise an error to cause a redirect,
-      # but it was a quick fix till a nice way is done.. 
-      # maybe via attributes? sub createUser :Alias(/ldap/user)
-      my $e;
-      if ($e = Exception::Class->caught('E::Redirect')) {
-        my $method = $e->method || $self->context->method();
-        $self->forward($e->newpath, method => $method);
-      }
-      elsif ($e = Exception::Class->caught())  {
-        ref $e ? $e->rethrow : die $e;
-      }
 
 
       # Hook to allow a plugins to run after a method has been called.
@@ -246,6 +255,8 @@ sub _run_method {
 
   E::Invalid::Method->throw(error    => 'No method given',
                             err_code => '-32601' );
+
+  return;  # Should never get here.
 }
 
 =head2 _error_handler
@@ -256,7 +267,6 @@ sub _run_method {
 sub _error_handler {
   my ($self, $exception) = @_;
 
-  warn $exception;
   if (ref($exception)) {
     my %error;
     $error{'message'} = $exception->description() .
@@ -279,6 +289,8 @@ sub _error_handler {
     $self->context->result({error => "Unknown error"});
     $self->log->error("Unknown error: $exception");
   }
+
+  return;
 }
 
 1;

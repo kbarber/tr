@@ -6,6 +6,7 @@ use JSON::XS qw/encode_json/;
 use IO::Capture::Stdout;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use base 'Exporter';
+## no critic
 our @EXPORT = qw/json_test/;
 no warnings 'redefine';
 

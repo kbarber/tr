@@ -166,6 +166,8 @@ sub system_doc :Global {
     $result{$path} = $methods;
   }
   $self->context->result({doc => {paths => \%result}});
+
+  return;
 }
 
 1;

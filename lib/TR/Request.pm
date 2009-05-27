@@ -137,8 +137,9 @@ sub params {
 
 =cut
 sub param {
-  my $self = shift;
-  return $self->req->param(@_);
+  my ($self, @args) = @_;
+
+  return $self->req->param(@args);
 }
 
 =head2 rpc_path 
@@ -156,7 +157,7 @@ sub rpc_path {
   my $uri = $self->uri();
   my $location = $self->location();
 
-  $uri =~ s/$location//;
+  $uri =~ s/$location//x;
   
   return $uri;
 }
@@ -172,13 +173,11 @@ sub location {
   if ($self->req->can('location')) {
     return $self->req->location();
   }
-  elsif ($self->uri =~ m#/t#) { # TODO Hacky..
+  elsif ($self->uri =~ m#/t#x) { # TODO Hacky..
     return '/t'; # Get from config?
   }
-  else {
-    return '';
-  }
 
+  return '';
 }
 
 =head2 uri

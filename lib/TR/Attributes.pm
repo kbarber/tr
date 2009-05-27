@@ -19,6 +19,8 @@ sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
   else {
     push @{$TR::method_schema{$package}{$referent}}, $data;
   }
+
+  return;
 }
 
 =head2 UNIVERSAL::Local
@@ -30,6 +32,8 @@ sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
 sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
   push @{$TR::attribute_cache{'Local'}{$package}{$referent}}, $attr;
+
+  return;
 }
 
 =head2 UNIVERSAL::Regex
@@ -41,6 +45,8 @@ sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
 sub UNIVERSAL::Global :ATTR(CODE, BEGIN) {
   my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
   push @{$TR::attribute_cache{'Global'}{$package}{$referent}}, $attr;
+
+  return;
 }
 
 =head2 _get_handler_paths
@@ -84,6 +90,7 @@ sub _get_name_by_code_ref {
 
   my %symbol_table;
 
+  ## no critic
   eval('%symbol_table = %' . $package . '::'); 
   foreach my $entry (keys %symbol_table) {
     my $symbol = $symbol_table{$entry};
@@ -93,6 +100,8 @@ sub _get_name_by_code_ref {
       }
     }
   }
+
+  return;
 }
 
 =head2 _is_public_method 

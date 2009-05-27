@@ -1,6 +1,7 @@
 package TR::Context::HTML;
 use TR::Standard;
 use TR::Pod; # For get_path_to_module :(
+use TR::Exceptions;
 
 use Template;
 use Data::Dumper;
@@ -44,9 +45,11 @@ sub method {
 
 =cut
 sub set_params {
-  my $self   = shift;
-  my %new_params = @_;
+  my ($self, %new_params) = @_;
+
   $self->_params(\%new_params);
+
+  return;
 }
 
 =head2 params
@@ -85,13 +88,13 @@ sub view {
     if (ref($result) eq 'HASH' && $result->{'error'}) {
       my $tt = Template->new(INCLUDE_PATH => $path);
       $tt->process('html_error.tmpl', $result)
-        || warn $tt->error();
+        || E::Fatal->throw('Unable to load Template: ' . $tt->error());
     }
     else {
       if ($result->{'doc'}) {
         my $tt = Template->new(INCLUDE_PATH => $path);
         $tt->process('html_doc.tmpl', $result)
-          || warn $tt->error();
+          || E::Fatal->throw('Unable to load Template: ' . $tt->error());
       }
       else {
         print "<html><body><pre>";

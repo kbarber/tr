@@ -1,5 +1,7 @@
 package TR::Plugins::SchemaChecks;
 use TR::Standard;
+use English;
+
 use TR::Exceptions;
 use TR::Pod;
 
@@ -27,11 +29,12 @@ sub pre_method_hook {
 
   if (my $schema = $pod->get_schema(package => ref($control),
                                     method  => $args{'method'})) {
+    ## no critic
     eval {
       validate(decode_json($schema), $params);
     };
-    if ($@) {
-      E::Invalid::Params->throw(error    => $@,
+    if ($EVAL_ERROR) {
+      E::Invalid::Params->throw(error    => $EVAL_ERROR,
                                 err_code => '-32602');
     }
   }
@@ -54,11 +57,12 @@ sub post_method_hook {
 
   if (my $schema = $pod->get_result_schema(package => ref($control),
                                            method  => $args{'method'})) {
+    ## no critic
     eval {
       validate(decode_json($schema), $result);
     };
-    if ($@) {
-      E::Invalid::Result->throw(error    => $@,
+    if ($EVAL_ERROR) {
+      E::Invalid::Result->throw(error    => $EVAL_ERROR,
                                 err_code => '-32602');
     }
   }

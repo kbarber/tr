@@ -1,5 +1,7 @@
 package TR::Config;
 use TR::Standard;
+use English;
+
 use TR::Exceptions;
 
 use Config::Any::JSON;
@@ -17,10 +19,11 @@ sub new {
   my $self;
   eval {
     $self = Config::Any::JSON->load($file);
-  };
-  if ($@) {
-    E::Invalid::Config->throw($@);
+    1;
   }
+  or do {
+    E::Invalid::Config->throw($EVAL_ERROR);
+  };
 
   bless $self, $class;
 

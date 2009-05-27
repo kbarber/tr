@@ -38,10 +38,10 @@ sub handles {
   
 =cut
 sub result {
-  my $self = shift;
+  my ($self, @args) = @_;
 
-  if (@_) {
-    my $result = @_ > 1 ? {@_} : $_[0];
+  if (@args) {
+    my $result = @args > 1 ? {@args} : $args[0];
     croak('result takes a hash or hashref') unless ref $result;
     $self->{'result'} = {} if not $self->{'result'};
     _merge_hash($self->{'result'}, $result);
@@ -67,6 +67,8 @@ sub _merge_hash {
       $a->{$key} = $b->{$key};
     }
   }
+
+  return;
 }
 
 sub _init {

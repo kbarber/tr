@@ -1,5 +1,7 @@
 package TR::Context::JSON;
 use TR::Standard;
+use English;
+
 use Kwalify qw(validate);
 use JSON::XS '2.2';
 
@@ -47,31 +49,33 @@ sub _init {
       $content = $self->retrieve_json_from_get();
       last;
     };
-    warn ("Unable to handle request method '$_'");
+    E::Fatal->throw("Unable to handle request method '$_'");
   }
 
   if ($content) {
     if (my $json_request = $self->coder->decode($content)) {
 
-      my $json_rpc_schema = $self->coder->decode('
-        {
-          "type": "map",
-          "require": true,
-          "mapping": {
-            "jsonrpc": { "type": "float", "enum": ["2.0"], "required": true },
-            "method":  { "type": "str", "required": true },
-            "params": { "type": "any", "required": false },
-            "id": { "type": "int", "required": false }
-          }
-        }');
-
+      my $json_rpc_schema = $self->coder->decode(<<'JSONRPC2'
+{
+  "type": "map",
+  "require": true,
+  "mapping": {
+    "jsonrpc": { "type": "float", "enum": ["2.0"], "required": true },
+    "method":  { "type": "str", "required": true },
+    "params": { "type": "any", "required": false },
+    "id": { "type": "int", "required": false }
+  }
+}
+JSONRPC2
+                            );
       eval {
         validate($json_rpc_schema, $json_request);
-      };
-      if ($@) {
-        E::Invalid->throw(error => "The received JSON not a valid JSON-RPC Request: $@",
-                          err_code => '-32600');
+        1;
       }
+      or do {
+        E::Invalid->throw(error => "The received JSON not a valid JSON-RPC Request: $EVAL_ERROR",
+                          err_code => '-32600');
+      };
 
       $self->{'json_request'} = $json_request;
       return;
@@ -81,6 +85,7 @@ sub _init {
                       err_code => '-32700');
   }
 
+  return;
 }
 
 =head2 method 
@@ -123,8 +128,7 @@ sub params {
 
 =cut
 sub set_params {
-  my $self   = shift;
-  my %params = @_;
+  my ($self, %params) = @_;
 
   $self->{'json_request'}{'params'} = \%params;
 
@@ -156,6 +160,7 @@ sub retrieve_json_from_post {
 sub retrieve_json_from_get {
   my $self = shift;
   # TODO
+  return;
 }
 
 =head2 view
@@ -188,6 +193,8 @@ sub view {
   }
 
   print $self->coder->encode(\%rpcdata);
+
+  return;
 }
 
 =head2 error_handler
@@ -197,7 +204,7 @@ sub view {
 sub error_handler {
   my ($self, $exception) = @_;
 
-
+  return;
 }
 
 1;

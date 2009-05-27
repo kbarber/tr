@@ -15,13 +15,13 @@ use_ok('TR');
 
 my ($response, $time);
 
-$response = json_test('TR', uri => '/', method => 'testmethod', params => {aparam => 'test'});
+$response = json_test('TR', uri => '/t', method => 'testmethod', params => {aparam => 'test'});
 like($response, qr/Method is unsupported: testmethod/, 'Correct error given for unsupported method');
 
 $response = json_test('TR', uri => '/', method => 'system.version');
 like($response, qr/"version"/, 'Can get version');
 
-($response, $time) = json_test('TR', uri => '/', method => 'system.doc', params => { show => 'system_schema' });
+($response, $time) = json_test('TR', uri => '/t', method => 'system.doc', params => { show => 'system_schema' });
 like($response, qr/"poddoc"/, "Can show doc for system_schema method ($time seconds)");
 
 ($response, $time) = json_test('TR', uri => '/', method => 'system.schema', params => { show => 'system_doc' });

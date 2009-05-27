@@ -21,6 +21,8 @@ sub import {
   strict->import();
   utf8->import();
   Log::Log4perl->import();
+
+  return;
 }
 
 1;
