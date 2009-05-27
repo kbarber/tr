@@ -1,0 +1,19 @@
+.git/hooks/pre-commit
+---------------------------------------
+#!/bin/sh
+if [ -d t ]; then
+    res=`prove t`
+    if [ $? -gt 0 ]; then
+        echo "tests fails"
+        exit 1
+    fi
+fi
+if [ -d xt ]; then
+    res=`prove xt`
+    if [ $? -gt 0 ]; then
+        echo "tests fails"
+        exit 1
+    fi
+fi
+---------------------------------------
+chmod +x .git/hooks/pre-commit
