@@ -99,6 +99,7 @@ sub view {
           || E::Fatal->throw('Unable to load Template: ' . $tt->error());
       }
       else {
+        delete $result->{'location'};
         print "<html><body><pre>";
         print JSON::XS->new->utf8->pretty(1)->allow_nonref->encode($result);
         print "</pre></body></html>";
