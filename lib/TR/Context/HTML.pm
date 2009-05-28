@@ -5,7 +5,8 @@ use TR::Exceptions;
 
 use Template;
 use Data::Dumper;
-use base 'TR::Context';
+use JSON::XS;
+
 __PACKAGE__->mk_accessors(qw/_params/);
 
 =head2 new
@@ -98,8 +99,7 @@ sub view {
       }
       else {
         print "<html><body><pre>";
-        local $Data::Dumper::Terse = 1;
-        print Dumper $result;
+        print JSON::XS->new->utf8->pretty(1)->allow_nonref->encode($result);
         print "</pre></body></html>";
       }
     }
