@@ -2,7 +2,8 @@ package TR::Test;
 use TR::Standard;
 
 use CGI::Simple;
-use JSON::XS qw/encode_json/;
+use JSON::XS qw/encode_json decode_json/;
+use Kwalify qw/validate/;
 use IO::Capture::Stdout;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use base 'Exporter';
@@ -65,6 +66,30 @@ sub json_test {
   $capture->stop();
 
   my $response = join('', $capture->read);
+  
+  # validate
+  if (my $result = $args{'validate'}) {
+    # no critic
+    $response =~ s/Content-type: application\/json//;
+    my $schema = '
+      {
+        "type": "map",
+        "require": true,
+        "mapping": {
+          "jsonrpc": { "type": "float", "enum": ["2.0"], "required": true },
+          "id": { "type": "int", "required": false },
+          "result": { "type": "map", "mapping": ' . $result . ' }
+        }
+      }';
+    eval {
+      validate(decode_json($schema), decode_json($response));
+      1;
+    }
+    or do {
+      return $@;
+    };
+  }
+
   return wantarray ? ($response, $elapsed) : $response;
 }
 

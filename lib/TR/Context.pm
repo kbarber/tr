@@ -23,7 +23,6 @@ sub handles {
   foreach my $type (@{$supported_types}) {
     if ( lc($content_type) eq lc($type)) {
       $self->request($request);
-      $self->_init();
       return $self;
     }
   }
@@ -71,7 +70,7 @@ sub _merge_hash {
   return;
 }
 
-sub _init {
+sub init {
 }
 
 1;

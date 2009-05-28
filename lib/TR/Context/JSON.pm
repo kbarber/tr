@@ -24,12 +24,12 @@ sub new {
   return $self;
 }
 
-=head2 _init
+=head2 init
 
   Basic JSON RPC setup stuff.
 
 =cut
-sub _init {
+sub init {
   my $self  = shift;
 
   my $request = $self->request;

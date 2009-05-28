@@ -99,6 +99,13 @@ sub new {
       next unless $context->can('handles');
       if ($context->handles(request => $request)) {
         $self->context($context);
+        eval {
+          $context->init();
+          1;
+        }
+        or do {
+          $self->_error_handler($EVAL_ERROR);
+        };
         last;
       };
     }
