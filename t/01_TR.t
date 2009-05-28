@@ -7,10 +7,13 @@ use CGI;
 use lib "$Bin/../lib";
 use lib "$Bin";
 
-use Test::More tests => 6;
+use Test::More tests => 9;
 use TR::Test;
 
 use_ok('TR::Pod');
+use_ok('TR::Context');
+use_ok('TR::Context::HTML');
+use_ok('TR::Context::JSON');
 use_ok('TR');
 
 my ($response, $time);

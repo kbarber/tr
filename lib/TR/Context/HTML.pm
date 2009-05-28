@@ -7,6 +7,7 @@ use Template;
 use Data::Dumper;
 use JSON::XS;
 
+use base 'TR::Context';
 __PACKAGE__->mk_accessors(qw/_params/);
 
 =head2 new
