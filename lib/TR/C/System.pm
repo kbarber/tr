@@ -5,7 +5,7 @@ use TR::Pod;
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/context config version log/);
 
-my $VERSION = '0.04';
+my $VERSION = '0.5';
 
 sub new {
   my ($proto, %args) = @_;
