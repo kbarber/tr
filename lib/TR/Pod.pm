@@ -31,7 +31,6 @@ sub new {
                                           num_pages       => '157', # Max pages, should be prime.
                                           context         => $self,
                                           read_cb         => sub { $_[0]->_get_schema($_[1]) }, # Fetch schema on cache miss
-                                          expire_time     => '1h',
                                          );
   my $rschema_cache = new Cache::FastMmap(share_file      => '/var/cache/tr/TR_rschema.cache.' . $<,
                                           cache_not_found => 1,
@@ -39,7 +38,6 @@ sub new {
                                           num_pages       => '157', # Max pages, should be prime.
                                           context         => $self,
                                           read_cb         => sub { $_[0]->_get_result_schema($_[1]) }, # Fetch schema on cache miss
-                                          expire_time     => '1h',
                                          );
 
   $self->schema_cache($schema_cache);
