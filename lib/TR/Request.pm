@@ -198,6 +198,42 @@ sub uri {
   return;
 }
 
+=head2 server_name
+
+  Returns the servername
+
+=cut
+sub server_name {
+  my $self = shift;
+
+  if ($self->req->can('get_server_name')) {
+    return $self->req->get_server_name();
+  }
+  else {
+    return $self->req->server_name();
+  }
+
+  return;
+}
+
+=head2 server_port
+
+  Returns the server port
+
+=cut
+sub server_port {
+  my $self = shift;
+
+  if ($self->req->can('get_server_port')) {
+    return $self->req->get_server_port();
+  }
+  else {
+    return $self->req->server_port();
+  }
+
+  return;
+}
+
 1;
 
 

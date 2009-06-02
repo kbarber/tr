@@ -33,7 +33,7 @@ sub _init {
         "show":"doc"
       }
     }
-    ' 'http://tr.test.alfresco.com/t/'
+    ' 'http://<server>:<port>/t/'
 
   Response:
     {
@@ -86,7 +86,7 @@ sub system_schema :Global {
       "jsonrpc":"2.0",
       "method":"system.version",
     }
-    ' 'http://tr.test.alfresco.com/t/ldap/user'
+    ' 'http://<server>:<port>/t/ldap/user'
 
   Response:
     {
@@ -114,7 +114,7 @@ sub system_version :Global {
         "show":"getDnByUid"
       }
     }
-    ' 'http://tr.test.alfresco.com/t/ldap/user'
+    ' 'http://<server>:<port>/t/ldap/user'
 
   Response:
     {
@@ -146,6 +146,14 @@ sub system_doc :Global {
 
         if (my $doc = $pod->get_documentation('package' => ref($self),
                                               method    => $params->{'show'})) {
+
+          # Variable subtitution.
+          my $server = $self->context->request->server_name();
+          my $port   = $self->context->request->server_port();
+          $doc =~ s/<server>/$server/ximg;
+          $doc =~ s/<port>/$port/ximg;
+
+
           $self->context->result({doc => {method => $params->{'show'}}});
           $self->context->result({doc => {poddoc => $doc}});
           return;
