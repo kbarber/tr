@@ -242,16 +242,11 @@ sub server_port {
 sub protocol {
   my $self = shift;
 
-  if ($self->req->can('dir_config')) {
-    if ($self->req->dir_config('HTTPS') eq "ON") {
-      return 'https';
-    }
-    else {
-      return 'http';
-    }
+  if ($ENV{'HTTPS'}) {
+    return 'https';
   }
   else {
-    return $self->req->protocol();
+    return 'http';
   }
 
   return;
