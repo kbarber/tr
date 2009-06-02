@@ -234,6 +234,29 @@ sub server_port {
   return;
 }
 
+=head2 protocol
+
+  Returns http or https
+
+=cut
+sub protocol {
+  my $self = shift;
+
+  if ($self->req->can('dir_config')) {
+    if ($self->req->dir_config('HTTPS') eq "ON") {
+      return 'https';
+    }
+    else {
+      return 'http';
+    }
+  }
+  else {
+    return $self->req->protocol();
+  }
+
+  return;
+}
+
 1;
 
 
