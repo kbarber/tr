@@ -151,11 +151,10 @@ sub system_doc :Global {
           my $server   = $self->context->request->server_name();
           my $port     = $self->context->request->server_port();
           my $protocol = $self->context->request->protocol();
-          
+
           $doc =~ s/<server>/$server/ximg;
           $doc =~ s/<port>/$port/ximg;
-          $protocol =~ s/<protocol>/$protocol/ximg;
-
+          $doc =~ s/<protocol>/$protocol/ximg;
 
           $self->context->result({doc => {method => $params->{'show'}}});
           $self->context->result({doc => {poddoc => $doc}});
