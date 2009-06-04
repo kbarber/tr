@@ -2,17 +2,58 @@ package TR::C::System;
 use TR::Standard;
 use TR::Pod;
 
+use vars qw($VERSION);
+use version; $VERSION = qv('1.0');
+
+=head1 NAME
+
+  TR::C::System
+
+=head1 LICENSE AND COPYRIGHT
+
+  GNU GENERAL PUBLIC LICENSE
+	Version 3, 29 June 2007
+
+  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+
+=head1 SYNOPSIS
+
+  ---------------------------------------------------
+
+  package TR::C::example;
+  use TR::Standard;
+
+  use base 'TR::C::System';
+
+  sub _init {
+    # Setup...
+  }
+
+  sub helloworld :Local {
+    my $self = shift;
+    my $params = $self->context->params;
+    $self->context->result('Hello world');
+  }
+
+  ---------------------------------------------------
+
+
+=head1 DESCRIPTION 
+
+  Base TR:C module provides documentation functions.
+
+=head1 SUBROUTINES/METHODS
+
+=cut
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/context config version log/);
-
-my $VERSION = '0.5';
 
 sub new {
   my ($proto, %args) = @_;
   my ($class) = ref $proto || $proto;
 
   my $self = bless \%args, $class;
-  $self->{'version'} = $VERSION;
+  $self->{'version'} = $VERSION->normal;
   $self->{'log'} = Log::Log4perl->get_logger();
   $self->_init();
 

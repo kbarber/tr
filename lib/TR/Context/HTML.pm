@@ -1,11 +1,10 @@
 package TR::Context::HTML;
 use TR::Standard;
-use TR::Pod; # For get_path_to_module :(
+use TR::Pod; # TODO For get_path_to_module :(
 use TR::Exceptions;
 
 use Template;
-use Data::Dumper;
-use JSON::XS;
+use JSON::XS '2.2';
 
 use base 'TR::Context';
 __PACKAGE__->mk_accessors(qw/_params/);

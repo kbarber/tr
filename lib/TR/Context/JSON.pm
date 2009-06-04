@@ -2,6 +2,48 @@ package TR::Context::JSON;
 use TR::Standard;
 use English;
 
+use vars qw($VERSION);
+use version; $VERSION = qv('1.0');
+
+=head1 NAME
+
+TR::Context::JSON - Module to handle JSON-RPC context.
+
+=head1 LICENSE AND COPYRIGHT
+
+  GNU GENERAL PUBLIC LICENSE
+	Version 3, 29 June 2007
+
+  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+  
+
+=head1 SYNOPSIS
+
+  Used from within TR:
+
+  use Module::Pluggable search_path => 'TR::Context',
+                      inner       => 0,
+                      sub_name    => 'context_handlers',
+                      instantiate => 'new';
+
+  foreach my $context ($self->context_handlers()) {
+    next unless $context->can('handles');
+    if ($context->handles(request => $request)) {
+      $self->context($context);
+      $context->init();
+    }
+  }
+
+  my $method = $context->method;
+  my $params = $context->params;
+
+=head1 DESCRIPTION 
+
+  TR::Context::JSON handles JSON-RPC calls to TR, and generates JSON-RPC
+  responses from the results of a TR call.
+
+=cut
+
 use Kwalify qw(validate);
 use JSON::XS '2.2';
 

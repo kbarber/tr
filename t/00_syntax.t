@@ -6,8 +6,9 @@ use lib "$Bin";
 use TR::Standard;
 use File::Find qw/find/;
 # TR::Standard enables strict and warnings which critic doesn't pick up.
-use Test::Perl::Critic (-severity => 3, -exclude => ['RequireUseStrict',
-                                                     'RequireUseWarnings']);
+use Test::Perl::Critic (-severity => 3, -exclude => [qw/RequireUseStrict
+                                                        RequireUseWarnings
+                                                        RequireRcsKeywords/]);
 use Test::More tests => 14;
 
 chdir("$Bin/../lib");

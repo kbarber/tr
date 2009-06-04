@@ -2,6 +2,43 @@ package TR;
 use TR::Standard;
 use English;
 
+use vars qw($VERSION);
+use version; $VERSION = qv('1.0');
+
+=head1 NAME
+
+  TR - Engine
+
+=head1 LICENSE AND COPYRIGHT
+
+  GNU GENERAL PUBLIC LICENSE
+	Version 3, 29 June 2007
+
+  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+
+=head1 SYNOPSIS
+
+  # Mod perl setup
+  PerlSwitches -I/opt/tr/engine/lib -I/opt/tr/app
+  PerlSetVar config /etc/tr/registry.conf 
+
+  <Location /t>
+    SetHandler perl-script
+    PerlResponseHandler TR::ModPerl2
+    PerlOptions +ParseHeaders
+  </Location>
+
+=head1 DESCRIPTION 
+
+  The TR handles incoming requests and maps them to control
+  modules.
+
+  See <TR::C::System> for an example of a control module.
+
+=head1 SUBROUTINES/METHODS
+
+=cut
+
 use Module::Pluggable search_path => 'TR::Context',
                       inner       => 0,
                       sub_name    => 'context_handlers',
@@ -36,8 +73,6 @@ __PACKAGE__->mk_accessors(qw/debug
                              context
                              version
                              log/);
-
-my $VERSION = '0.06';
 
 =head2 new
 

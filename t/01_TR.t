@@ -22,7 +22,7 @@ $response = json_test('TR', uri => '/t', method => 'testmethod', params => {apar
 like($response, qr/Method is unsupported: testmethod/, 'Correct error given for unsupported method');
 
 $response = json_test('TR', uri => '/', method => 'system.version');
-like($response, qr/"version"/, 'Can get version');
+like($response, qr/"version" : "v/, 'Can get version');
 
 ($response, $time) = json_test('TR', uri => '/t', method => 'system.doc', params => { show => 'system_schema' });
 like($response, qr/"poddoc"/, "Can show doc for system_schema method ($time seconds)");
