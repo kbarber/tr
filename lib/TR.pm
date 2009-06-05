@@ -166,13 +166,7 @@ sub new {
             next if not $context->can('handles');
             if ( $context->handles( request => $request ) ) {
                 $self->context($context);
-                eval {
-                    $context->init();
-                    1;
-                }
-                or do {
-                    $self->_error_handler($EVAL_ERROR);
-                };
+                $context->init();
                 last;
             }
         }
@@ -201,12 +195,14 @@ sub handler {
     my $self = shift;
 
     eval {
-        $self->forward( $self->context->request->rpc_path() );
+        my $path = $self->context->request->rpc_path();
+        $self->log->info( $path . ' ' . $self->context->method() );
+        $self->forward( $path );
         1;
-        }
-        or do {
+    }
+    or do {
         $self->_error_handler($EVAL_ERROR);
-        };
+    };
 
     if ( $self->context ) {
         $self->context->view();
@@ -231,14 +227,14 @@ sub forward {
         $self->_run_method(
             $args{'method'},
             'package' => $handler->{'package'},
-            context   => $self->context
+            'context' => $self->context
         );
     }
     else {
         $self->_run_method(
             $args{'method'},
             'package' => 'TR::C::System',
-            context   => $self->context
+            'context' => $self->context
         );
     }
 
