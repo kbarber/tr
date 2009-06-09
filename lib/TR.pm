@@ -3,7 +3,7 @@ use TR::Standard;
 use English qw(-no_match_vars);
 
 use vars qw($VERSION);
-use version; $VERSION = qv('1.0');
+use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
@@ -363,8 +363,9 @@ sub _error_handler {
         $self->log->debug( $exception->description() . ' : '
                 . $exception->error() . ' : '
                 . $exception->trace->as_string );
-
-        $error{'err_code'} = $exception->err_code();
+        if ($exception->can('err_code')) {
+            $error{'err_code'} = $exception->err_code();
+        }
         $self->context->result( { error => \%error } );
     }
     else {

@@ -3,7 +3,7 @@ use TR::Standard;
 use TR::Pod;
 
 use vars qw($VERSION);
-use version; $VERSION = qv('1.0');
+use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
