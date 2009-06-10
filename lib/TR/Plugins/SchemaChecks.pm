@@ -29,7 +29,7 @@ sub pre_method_hook {
 
   if (my $schema = $pod->get_schema(package => ref($control),
                                     method  => $args{'method'})) {
-    ## no critic
+    ## no critic (RequireCheckingReturnValueOfEval)
     eval {
       validate(decode_json($schema), $params);
     };
@@ -57,7 +57,7 @@ sub post_method_hook {
 
   if (my $schema = $pod->get_result_schema(package => ref($control),
                                            method  => $args{'method'})) {
-    ## no critic
+    ## no critic (RequireCheckingReturnValueOfEval)
     eval {
       validate(decode_json($schema), $result);
     };

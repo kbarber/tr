@@ -144,7 +144,7 @@ sub new {
 
     # Default logging setup.
     if ( not $self->log ) {
-        ## no critic
+        ## no critic (ProhibitImplicitNewlines)
         Log::Log4perl->init(
             \qq{
       log4perl.rootLogger=ERROR, LOGFILE   
@@ -231,6 +231,7 @@ sub forward {
         );
     }
     else {
+	# suggest a close match.
         $self->_run_method(
             $args{'method'},
             'package' => 'TR::C::System',
@@ -310,8 +311,7 @@ sub _run_method {
                # maybe via attributes? sub createUser :Alias(/ldap/user)
                 my $e;
                 if ( $e = Exception::Class->caught('E::Redirect') ) {
-                    my $method = $e->method || $self->context->method();
-                    $self->forward( $e->newpath, method => $method );
+                    $self->forward( $e->newpath, method => $e->method );
                 }
                 elsif ( $e = Exception::Class->caught() ) {
                     ref $e ? $e->rethrow : E::Fatal->throw($e);

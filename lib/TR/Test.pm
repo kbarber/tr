@@ -1,3 +1,4 @@
+## no critic (ProhibitAutomaticExportation RequireExtendedFormatting ProhibitImplicitNewlines ProhibitNoWarnings ProhibitStringyEval RequireCheckingReturnValueOfEval)
 package TR::Test;
 use TR::Standard;
 
@@ -7,7 +8,6 @@ use Kwalify qw/validate/;
 use IO::Capture::Stdout;
 use Time::HiRes qw/gettimeofday tv_interval/;
 use base 'Exporter';
-## no critic
 our @EXPORT = qw/json_test/;
 no warnings 'redefine';
 
@@ -34,13 +34,13 @@ sub json_test {
     'id'      => ++$id,
   };
 
-  $ENV{'CONTENT_TYPE'}   = 'application/json';
-  $ENV{'REQUEST_METHOD'} = 'POST';
-  $ENV{'SCRIPT_NAME'}    = $args{'uri'};
+  local $ENV{'CONTENT_TYPE'}   = 'application/json';
+  local $ENV{'REQUEST_METHOD'} = 'POST';
+  local $ENV{'SCRIPT_NAME'}    = $args{'uri'};
 
   my $test_json = encode_json $test_data;
   
-  $ENV{'CONTENT_LENGTH'} = length($test_json);
+  local $ENV{'CONTENT_LENGTH'} = length($test_json);
   my $cgi = new CGI::Simple({POSTDATA => $test_json});
 
   my $app;
@@ -69,7 +69,6 @@ sub json_test {
   
   # validate
   if (my $result = $args{'validate'}) {
-    # no critic
     $response =~ s/Content-type: application\/json//;
     my $schema = '
       {
