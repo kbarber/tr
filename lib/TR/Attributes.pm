@@ -3,6 +3,51 @@ use strict;
 use warnings;
 use Attribute::Handlers;
 
+=head1 NAME
+
+    TR::Attributes - handles attributes for TR
+
+=head1 VERSION
+
+   See $TR::VERSION
+   
+=head1 LICENSE AND COPYRIGHT
+
+  GNU GENERAL PUBLIC LICENSE
+	Version 3, 29 June 2007
+
+  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+
+=head1 SYNOPSIS
+
+  See <TR>
+
+=head1 DESCRIPTION 
+
+  This module handles a list of attributes control modules can have.
+  It maintains a list of functions/attributes, and provides methods
+  to query whether a function handles a given path and is a public method.
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+  see <TR>
+
+=head1 DEPENDENCIES
+
+=head1 INCOMPATIBILITIES
+
+=head1 AUTHOR
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS AND LIMITATIONS
+
+  Probably a few.
+
+=head1 SUBROUTINES/METHODS
+
+=cut
+
 use base 'Class::Accessor::Fast';
 
 =head2 UNIVERSAL::Params
@@ -11,16 +56,19 @@ use base 'Class::Accessor::Fast';
   and checks parameters passed before running method.
 
 =cut
-sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
-  my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  if (not ref($data) eq 'ARRAY') {
-    return; # TODO: Maybe warn
-  }
-  else {
-    push @{$TR::method_schema{$package}{$referent}}, $data;
-  }
 
-  return;
+sub UNIVERSAL::Params : ATTR(CODE, BEGIN) {
+    my ($package, $symbol, $referent, $attr,
+        $data,    $phase,  $filename, $linenum) = @_;
+
+    if ( not ref($data) eq 'ARRAY' ) {
+        return;    # TODO: Maybe warn
+    }
+    else {
+        push @{ $TR::method_schema{$package}{$referent} }, $data;
+    }
+
+    return;
 }
 
 =head2 UNIVERSAL::Local
@@ -29,11 +77,14 @@ sub UNIVERSAL::Params :ATTR(CODE, BEGIN) {
   paths to handle base on Module and method name.
 
 =cut
-sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
-  my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  push @{$TR::attribute_cache{'Local'}{$package}{$referent}}, $attr;
 
-  return;
+sub UNIVERSAL::Local : ATTR(CODE, BEGIN) {
+    my ($package, $symbol, $referent, $attr,
+        $data,    $phase,  $filename, $linenum) = @_;
+
+    push @{ $TR::attribute_cache{'Local'}{$package}{$referent} }, $attr;
+
+    return;
 }
 
 =head2 UNIVERSAL::Regex
@@ -42,11 +93,14 @@ sub UNIVERSAL::Local :ATTR(CODE, BEGIN) {
   paths to handle with a regex
 
 =cut
-sub UNIVERSAL::Global :ATTR(CODE, BEGIN) {
-  my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
-  push @{$TR::attribute_cache{'Global'}{$package}{$referent}}, $attr;
 
-  return;
+sub UNIVERSAL::Global : ATTR(CODE, BEGIN) {
+    my ($package, $symbol, $referent, $attr,
+        $data,    $phase,  $filename, $linenum) = @_;
+
+    push @{ $TR::attribute_cache{'Global'}{$package}{$referent} }, $attr;
+
+    return;
 }
 
 =head2 _get_handler_paths
@@ -54,29 +108,32 @@ sub UNIVERSAL::Global :ATTR(CODE, BEGIN) {
   Returns list of handlers registered with attributes
 
 =cut
-my %handlers;  # Only generate once.
+
+my %handlers;    # Only generate once.
+
 sub _get_handler_paths {
-  return \%handlers if %handlers;
-  foreach my $package  (keys %{$TR::attribute_cache{'Local'}}) {
-    foreach my $code_ref (keys %{$TR::attribute_cache{'Local'}{$package}}) {
-      my $method_name = _get_name_by_code_ref($package, $code_ref);
+    return \%handlers if %handlers;
 
-      # generate a path from package/method
-      my $path = lc($package);
-      $path =~ s#::#/#g;
-      $path =~ s#^[^/]+/c##; # Remove base package name
+    foreach my $package ( keys %{ $TR::attribute_cache{'Local'} } ) {
+        foreach my $code_ref ( keys %{ $TR::attribute_cache{'Local'}{$package} } ) {
+            my $method_name = _get_name_by_code_ref( $package, $code_ref );
 
-      # Not happy about having this here at all, need to sort out
-      # Attribute handling to work better.
-      my $full_method_name = $package . '::' . $method_name;
+            # generate a path from package/method
+            my $path = lc($package);
+            $path =~ s#::#/#g;
+            $path =~ s#^[^/]+/c##;    # Remove base package name
 
-      # Store package and method details
-      $handlers{$path}{'package'} = $package;
-      push @{$handlers{$path}{'methods'}}, $method_name;
+            # Not happy about having this here at all, need to sort out
+            # Attribute handling to work better.
+            my $full_method_name = $package . '::' . $method_name;
+
+            # Store package and method details
+            $handlers{$path}{'package'} = $package;
+            push @{ $handlers{$path}{'methods'} }, $method_name;
+        }
     }
-  }
 
-  return \%handlers;
+    return \%handlers;
 }
 
 =head2 _get_name_by_code_ref
@@ -85,23 +142,24 @@ sub _get_handler_paths {
   symbols and not method names in BEGIN.
 
 =cut
+
 sub _get_name_by_code_ref {
-  my ($package, $code_ref) = @_;
+    my ( $package, $code_ref ) = @_;
 
-  my %symbol_table;
+    my %symbol_table;
 
-  ## no critic
-  eval('%symbol_table = %' . $package . '::'); 
-  foreach my $entry (keys %symbol_table) {
-    my $symbol = $symbol_table{$entry};
-    if (*{$symbol}{'CODE'}) {
-      if(*{$symbol}{'CODE'} eq $code_ref) {
-        return *{$symbol}{'NAME'};
-      }
+    ## no critic
+    eval( '%symbol_table = %' . $package . '::' );
+    foreach my $entry ( keys %symbol_table ) {
+        my $symbol = $symbol_table{$entry};
+        if ( *{$symbol}{'CODE'} ) {
+            if ( *{$symbol}{'CODE'} eq $code_ref ) {
+                return *{$symbol}{'NAME'};
+            }
+        }
     }
-  }
 
-  return;
+    return;
 }
 
 =head2 _is_public_method 
@@ -109,29 +167,32 @@ sub _get_name_by_code_ref {
   Checks to see if a method is allowed.
 
 =cut
+
 sub _is_public_method {
-  my $self   = shift;
-  my $method = shift || return;
+    my $self = shift;
+    my $method = shift || return;
 
-  my $package = ref($self);
+    my $package = ref($self);
 
-  if (my $cv = $self->can($method)) {
-    # Local
-    if (defined $TR::attribute_cache{'Local'}{$package} and
-        defined $TR::attribute_cache{'Local'}{$package}{$cv}) {
-      return 1;
-    }
-    else {
-    # Global
-      foreach my $pkg (keys %{$TR::attribute_cache{'Global'}}) {
-        if (defined $TR::attribute_cache{'Global'}{$pkg}{$cv}) {
-          return 1;
+    if ( my $cv = $self->can($method) ) {
+
+        # Local
+        if (    defined $TR::attribute_cache{'Local'}{$package}
+            and defined $TR::attribute_cache{'Local'}{$package}{$cv} ) {
+            return 1;
         }
-      }
-    }
-  }
+        else {
 
-  return;
+            # Global
+            foreach my $pkg ( keys %{ $TR::attribute_cache{'Global'} } ) {
+                if ( defined $TR::attribute_cache{'Global'}{$pkg}{$cv} ) {
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return;
 }
 
 1;

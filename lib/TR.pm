@@ -7,11 +7,11 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-  TR - Engine
+  TR - TR Engine
 
 =head1 VERSION
 
-  1.0
+  See $VERSION
 
 =head1 LICENSE AND COPYRIGHT
 
