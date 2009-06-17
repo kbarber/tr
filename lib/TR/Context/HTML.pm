@@ -4,7 +4,7 @@ use TR::Pod; # TODO For get_path_to_module :(
 use TR::Exceptions;
 
 use Template;
-use JSON::XS '2.2';
+use JSON::XS 2.2;
 
 use base 'TR::Context';
 __PACKAGE__->mk_accessors(qw/_params/);

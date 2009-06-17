@@ -45,7 +45,7 @@ TR::Context::JSON - Module to handle JSON-RPC context.
 =cut
 
 use Kwalify qw(validate);
-use JSON::XS '2.2';
+use JSON::XS 2.2;
 
 use base 'TR::Context';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
