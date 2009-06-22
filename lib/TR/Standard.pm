@@ -13,7 +13,6 @@ use Log::Log4perl;
   use strict;
   use warnings;
   use utf8;
-  use decent method resolving.
 
 =cut
 sub import {

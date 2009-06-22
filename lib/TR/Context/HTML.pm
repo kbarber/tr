@@ -1,7 +1,75 @@
 package TR::Context::HTML;
 use TR::Standard;
-use TR::Pod; # TODO For get_path_to_module :(
+use TR::Pod;    # TODO For get_path_to_module :(
 use TR::Exceptions;
+
+use vars qw($VERSION);
+use version; $VERSION = qv('1.1');
+
+=head1 NAME
+
+    TR::Context::HTML - Handles HTML requests/responses for TR.
+
+=head1 VERSION
+
+    See $VERSION
+
+=head1 LICENSE AND COPYRIGHT
+
+    GNU GENERAL PUBLIC LICENSE
+	  Version 3, 29 June 2007
+
+    Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+
+=head1 SYNOPSIS
+
+    Used from within TR:
+
+    use Module::Pluggable search_path => 'TR::Context',
+                          inner       => 0,
+                          sub_name    => 'context_handlers',
+                          instantiate => 'new';
+
+    foreach my $context ($self->context_handlers()) {
+        next unless $context->can('handles');
+        if ($context->handles(request => $request)) {
+            $self->context($context);
+            $context->init();
+        }
+    }
+
+    my $method = $context->method;
+    my $params = $context->params;
+
+=head1 DESCRIPTION 
+
+    Handles requests of type 'Text/HTML' and returns
+    a response viewable in a browser.
+
+    Not designed as a interface for applications to use,
+    designed to provide and interface for humans to see 
+    documentation, schemas, and to test/see reponses to
+    available methods.
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+    See <TR>
+
+=head1 DEPENDENCIES
+
+=head1 INCOMPATIBILITIES
+
+=head1 AUTHOR
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS AND LIMITATIONS
+
+  Probably a few.
+
+=head1 SUBROUTINES/METHODS
+
+=cut
 
 use Template;
 use JSON::XS 2.2;
@@ -11,112 +79,120 @@ __PACKAGE__->mk_accessors(qw/_params/);
 
 =head2 new
 
-  Creates new TR::Context::HTML object to handle html requests
+    Creates new TR::Context::HTML object to handle html requests
 
 =cut
+
 sub new {
-  my $proto = shift;
-  my($class) = ref $proto || $proto;
+    my $proto = shift;
+    my ($class) = ref $proto || $proto;
 
-  my $self = bless {
-    supported => ['Text/HTML'],
-  }, $class;
+    my $self = bless { supported => ['Text/HTML'], }, $class;
 
-  return $self;
+    return $self;
 }
 
 =head2 method 
 
-  grab the method from an html request
+    Grab the method from an html request
 
 =cut
+
 sub method {
-  my $self = shift;
+    my $self = shift;
 
-  if(my $method = $self->request->param('method')) {
-    return $method;
-  }
+    if ( my $method = $self->request->param('method') ) {
+        return $method;
+    }
 
-  return;
+    return;
 }
 
 =head2 set_params
 
-  Sets a param
+    Sets a param
 
 =cut
+
 sub set_params {
-  my ($self, %new_params) = @_;
+    my ( $self, %new_params ) = @_;
 
-  $self->_params(\%new_params);
+    $self->_params( \%new_params );
 
-  return;
+    return;
 }
 
 =head2 params
 
-  Grabs params from request
+    Grabs params from request
 
 =cut
+
 sub params {
-  my $self = shift;
+    my $self = shift;
 
-  if (not $self->_params) {
-    my %params = $self->request->params();
+    if ( not $self->_params ) {
+        my %params = $self->request->params();
 
-    delete $params{'method'}; # remove method as it's not needed/wanted.
-    $self->_params(\%params);
-  }
+        delete $params{'method'};   # remove method as it's not needed/wanted.
+        $self->_params( \%params );
+    }
 
-  return $self->_params;
+    return $self->_params;
 }
 
 =head2 view
 
-  Displays view
+    Displays view
 
 =cut
+
 sub view {
-  my $self = shift;
+    my $self = shift;
 
-  print "Content-type: text/html\n\n";
+    print "Content-type: text/html\n\n";
 
-  my $pod = new TR::Pod;
-  my $path = $pod->get_path_to_module(ref $self);
+    my $pod  = new TR::Pod;
+    my $path = $pod->get_path_to_module( ref $self );
 
-  if (my $result = $self->result) {
-    $result->{'location'} = $self->request->location();
-    if (ref($result) eq 'HASH' && $result->{'error'}) {
-      my $tt = Template->new(INCLUDE_PATH => $path);
-      $tt->process('html_error.tmpl', $result)
-        || E::Fatal->throw('Unable to load Template: ' . $tt->error());
+    if ( my $result = $self->result ) {
+        $result->{'location'} = $self->request->location();
+        if ( ref($result) eq 'HASH' && $result->{'error'} ) {
+            my $tt = Template->new( INCLUDE_PATH => $path );
+            $tt->process( 'html_error.tmpl', $result )
+                || E::Fatal->throw(
+                'Unable to load Template: ' . $tt->error() );
+        }
+        else {
+            if ( $result->{'doc'} ) {
+                my $tt = Template->new( INCLUDE_PATH => $path );
+                $tt->process( 'html_doc.tmpl', $result )
+                    || E::Fatal->throw(
+                    'Unable to load Template: ' . $tt->error() );
+            }
+            else {
+                delete $result->{'location'};
+                print "<html><body><pre>";
+                # Disable perl critic complaining about JSON::XS's way of
+                # setting options.
+                ## no critic (ProhibitLongChainsOfMethodCalls)
+                print JSON::XS->new->utf8->pretty(1)->allow_nonref->encode($result);
+                print "</pre></body></html>";
+            }
+        }
     }
     else {
-      if ($result->{'doc'}) {
-        my $tt = Template->new(INCLUDE_PATH => $path);
-        $tt->process('html_doc.tmpl', $result)
-          || E::Fatal->throw('Unable to load Template: ' . $tt->error());
-      }
-      else {
-        delete $result->{'location'};
-        print "<html><body><pre>";
-        print JSON::XS->new->utf8->pretty(1)->allow_nonref->encode($result);
-        print "</pre></body></html>";
-      }
+        print "<html><head>\n";
+        print "<title>TR</title>\n";
+        print "</head>\n";
+        print "<body>";
+
+        print "<p>No data to display</p>";
+
+        print "</body>";
     }
-  }
-  else {
-    print "<html><head>\n";
-    print "<title>TR</title>\n";
-    print "</head>\n";
-    print "<body>";
 
-    print "<p>No data to display</p>";
-
-    print "</body>";
-  }
-
-  return;
+    return;
 }
 
 1;

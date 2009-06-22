@@ -196,7 +196,7 @@ sub handler {
 
     eval {
         my $path = $self->context->request->rpc_path();
-        $self->log->info( $path . ' ' . $self->context->method() );
+        $self->log->info( $path . q{ } . $self->context->method() );
         $self->forward( $path );
         1;
     }
@@ -355,8 +355,9 @@ sub _error_handler {
 
     if ( ref $exception ) {
         my %error;
-        $error{'message'}
-            = $exception->description() . ': ' . $exception->error;
+        $error{'message'} = $exception->description() 
+                          . ': '
+                          . $exception->error;
 
         $self->log->error( $error{'message'} );
 

@@ -7,57 +7,76 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-  TR::C::System
+    TR::C::System
+
+=head1 VERSION
+
+    See $VERSION
 
 =head1 LICENSE AND COPYRIGHT
 
-  GNU GENERAL PUBLIC LICENSE
-	Version 3, 29 June 2007
+    GNU GENERAL PUBLIC LICENSE
+	    Version 3, 29 June 2007
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+    Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
 =head1 SYNOPSIS
 
-  ---------------------------------------------------
+    package TR::C::example;
+    use TR::Standard;
 
-  package TR::C::example;
-  use TR::Standard;
+    use base 'TR::C::System';
 
-  use base 'TR::C::System';
+    sub _init {
+        # Setup...
+    }
 
-  sub _init {
-    # Setup...
-  }
-
-  sub helloworld :Local {
-    my $self = shift;
-    my $params = $self->context->params;
-    $self->context->result('Hello world');
-  }
-
-  ---------------------------------------------------
-
+    sub helloworld :Local {
+        my $self = shift;
+        my $params = $self->context->params;
+        $self->context->result('Hello world');
+    }
 
 =head1 DESCRIPTION 
 
-  Base TR:C module provides documentation functions.
+    Base TR:C module provides documentation/schema functions,
+    logging and config.
+
+    All other Control modules should use this as base.
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+    See <TR>
+
+=head1 DEPENDENCIES
+
+=head1 INCOMPATIBILITIES
+
+=head1 AUTHOR
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS AND LIMITATIONS
+
+    Probably a few.
 
 =head1 SUBROUTINES/METHODS
 
 =cut
+
 use base 'TR::Attributes';
 __PACKAGE__->mk_ro_accessors(qw/context config version log/);
 
 sub new {
-  my ($proto, %args) = @_;
-  my ($class) = ref $proto || $proto;
+    my ( $proto, %args ) = @_;
+    my ($class) = ref $proto || $proto;
 
-  my $self = bless \%args, $class;
-  $self->{'version'} = $VERSION->normal;
-  $self->{'log'} = Log::Log4perl->get_logger();
-  $self->_init();
+    my $self = bless \%args, $class;
+    $self->{'version'} = $VERSION->normal;
+    $self->{'log'}     = Log::Log4perl->get_logger();
+    $self->_init();
 
-  return $self;
+    return $self;
 }
 
 sub _init {
@@ -83,7 +102,9 @@ sub _init {
     }
 
 =cut
-sub system_schema :Global {
+
+sub system_schema : Global {
+
 =begin schema
   {
     "type": "map",
@@ -94,29 +115,32 @@ sub system_schema :Global {
   }
 =cut
 
-  my $self = shift;
+    my $self = shift;
 
-  $self->context->result(doc => {version => $self->version});
+    $self->context->result( doc => { version => $self->version } );
 
-  if ($self->context) {
-    if (my $params = $self->context->params()) {
-      if ($self->_is_public_method($params->{'show'})) {
-        $self->context->result(doc => {method => $params->{'show'}});
+    if ( $self->context ) {
+        if ( my $params = $self->context->params() ) {
+            if ( $self->_is_public_method( $params->{'show'} ) ) {
+                $self->context->result( doc => { method => $params->{'show'} } );
 
-        my $pod = new TR::Pod;
-        if (my $schema = $pod->get_schema('package' => ref($self),
-                                          'method'  => $params->{'show'})) {
-          $self->context->result(doc => {schema => $schema});
+                my $pod = new TR::Pod;
+                if (my $schema = $pod->get_schema(
+                        'package' => ref($self),
+                        'method'  => $params->{'show'}
+                    )) {
+                    $self->context->result( doc => { schema => $schema } );
+                }
+                else {
+                    $self->context->result(
+                        doc => { schema => 'No schema.' } );
+                }
+                return;
+            }
         }
-        else {
-          $self->context->result(doc => {schema => 'No schema.'});
-        }
-        return;
-      }
     }
-  }
 
-  return;
+    return;
 }
 
 =head2 system_version
@@ -136,12 +160,13 @@ sub system_schema :Global {
     }
 
 =cut
-sub system_version :Global {
-  my $self = shift;
 
-  $self->context->result({version => $self->version});
+sub system_version : Global {
+    my $self = shift;
 
-  return;
+    $self->context->result( { version => $self->version } );
+
+    return;
 }
 
 =head2 system_doc
@@ -164,7 +189,9 @@ sub system_version :Global {
     }
 
 =cut
-sub system_doc :Global {
+
+sub system_doc : Global {
+
 =begin schema
   {
     "type": "map",
@@ -175,50 +202,52 @@ sub system_doc :Global {
   }
 =cut
 
-  my $self = shift;
+    my $self = shift;
 
-  $self->context->result({doc => {version => $self->version}});
+    $self->context->result( { doc => { version => $self->version } } );
 
-  # See if documentation for a specific method was wanted
-  if ($self->context) {
-    if (my $params = $self->context->params()) {
-      if ($self->_is_public_method($params->{'show'})) {
-        my $pod = new TR::Pod;
+    # See if documentation for a specific method was wanted
+    if ( $self->context ) {
+        if ( my $params = $self->context->params() ) {
+            if ( $self->_is_public_method( $params->{'show'} ) ) {
+                my $pod = new TR::Pod;
 
-        if (my $doc = $pod->get_documentation('package' => ref($self),
-                                              method    => $params->{'show'})) {
+                if (my $doc = $pod->get_documentation(
+                        'package' => ref($self),
+                        'method'  => $params->{'show'}
+                    )) {
 
-          # Variable subtitution.
-          my $server   = $self->context->request->server_name();
-          my $port     = $self->context->request->server_port();
-          my $protocol = $self->context->request->protocol();
+                    # Variable subtitution.
+                    my $server   = $self->context->request->server_name();
+                    my $port     = $self->context->request->server_port();
+                    my $protocol = $self->context->request->protocol();
 
-          $doc =~ s/<server>/$server/ximg;
-          $doc =~ s/<port>/$port/ximg;
-          $doc =~ s/<protocol>/$protocol/ximg;
+                    $doc =~ s/<server>/$server/xsimg;
+                    $doc =~ s/<port>/$port/xismg;
+                    $doc =~ s/<protocol>/$protocol/xismg;
 
-          $self->context->result({doc => {method => $params->{'show'}}});
-          $self->context->result({doc => {poddoc => $doc}});
-          return;
+                    $self->context->result( { doc => { method => $params->{'show'} } } );
+                    $self->context->result( { doc => { poddoc => $doc } } );
+                    return;
+                }
+            }
         }
-      }
     }
-  }
 
-  # Else display list of available methods
-  my %result;
-  my $handlers = $self->_get_handler_paths();
-  foreach my $path (keys %{$handlers}) {
-    my $methods = $handlers->{$path}{'methods'};
-    my $package = $handlers->{$path}{'package'};
-    if ($path eq '') {
-      $path = 'GLOBAL';
+    # Else display list of available methods
+    my %result;
+    my $handlers = $self->_get_handler_paths();
+    foreach my $path ( keys %{$handlers} ) {
+        my $methods = $handlers->{$path}{'methods'};
+        my $package = $handlers->{$path}{'package'};
+        if ( not $path ) {
+            $path = 'GLOBAL';
+        }
+        $result{$path} = $methods;
     }
-    $result{$path} = $methods;
-  }
-  $self->context->result({doc => {paths => \%result}});
+    $self->context->result( { doc => { paths => \%result } } );
 
-  return;
+    return;
 }
 
 1;
