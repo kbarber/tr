@@ -7,12 +7,16 @@ use TR::Standard;
 use File::Find qw/find/;
 
 # TR::Standard enables strict and warnings which critic doesn't pick up.
+# Also we use git not RCS..
+# And the regex requirements aren't always what one wants.
 use Test::Perl::Critic (
-    -severity => 3,
+    -severity => 2,
     -exclude  => [
         qw/RequireUseStrict
            RequireUseWarnings
-           RequireRcsKeywords/
+           RequireRcsKeywords
+           RequireDotMatchAnything
+           RequireLineBoundaryMatching/
     ]
 );
 use Test::More tests => 13;

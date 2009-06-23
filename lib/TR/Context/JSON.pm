@@ -107,11 +107,11 @@ sub init {
     # Code for perl < 5.10 - don't use a switch statement.
 
     for ( $request->request_method ) {
-        /POST/sm && do {
+        /POST/ && do {
             $content = $self->retrieve_json_from_post();
             last;
         };
-        /GET/sm && do {
+        /GET/ && do {
             $content = $self->retrieve_json_from_get();
             last;
         };

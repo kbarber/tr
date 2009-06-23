@@ -283,7 +283,7 @@ sub _run_method {
     }
 
     if ($method) {
-        $method =~ s/\./_/xsm;
+        $method =~ s/\./_/x;
 
         my $control = $self->_get_controller( type => $args{'package'} );
 

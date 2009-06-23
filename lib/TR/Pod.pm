@@ -7,6 +7,51 @@ use PPI;
 use Cache::FastMmap;
 use Cwd qw/realpath/;
 
+use vars qw($VERSION);
+use version; $VERSION = qv('1.1');
+
+=head1 NAME
+
+  TR::Pod - Fetches schemas and documentation from modules.
+            
+=head1 VERSION
+
+  See $VERSION
+
+=head1 LICENSE AND COPYRIGHT
+
+  GNU GENERAL PUBLIC LICENSE
+	Version 3, 29 June 2007
+
+  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION 
+
+    Finds and caches schema information from a module's Pod, also finds 
+    and returns documentation from a module's pod.
+
+    Is a singleton.
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+=head1 DEPENDENCIES
+
+=head1 INCOMPATIBILITIES
+
+=head1 AUTHOR
+
+=head1 DIAGNOSTICS
+
+=head1 BUGS AND LIMITATIONS
+
+  Probably a few.
+
+=head1 SUBROUTINES/METHODS
+
+=cut
+
 use base 'Class::Accessor::Fast';
 
 __PACKAGE__->mk_accessors(qw/schema_cache rschema_cache/);
@@ -110,13 +155,13 @@ sub get_documentation {
 
     my $module_dir = $self->get_path_to_module( $args{'package'} );
 
-    if ( $args{'package'} =~ /([^:]+)$/x ) {
+    if ( $args{'package'} =~ /([^:]+)$/sx ) {
         my $document = $self->_fetch( module_file => $module_dir . $1 . '.pm' );
 
         if (my $results = $document->find(
                 sub {
                     $_[1]->isa('PPI::Token::Pod')
-                        and ( $_[1]->content =~ /=head2\ $args{'method'}/x );
+                        and ( $_[1]->content =~ /=head2\ $args{'method'}/mx );
                 }
             )) {
             my $content = @{$results}[0]->content();
@@ -147,7 +192,7 @@ sub _get_from_pod {
 
     my $module_dir = $self->get_path_to_module( $args{'package'} );
 
-    if ( $args{'package'} =~ /([^:]+)$/x ) {
+    if ( $args{'package'} =~ /([^:]+)$/sx ) {
         my $document
             = $self->_fetch( module_file => $module_dir . $1 . '.pm' );
 
@@ -187,7 +232,7 @@ sub get_schema {
         return;
     }
 
-    return $self->schema_cache->get( join( ':', $args{'package'}, $args{'method'} ) );
+    return $self->schema_cache->get( join( q{:}, $args{'package'}, $args{'method'} ) );
 }
 
 =head2 _get_schema 
@@ -224,7 +269,7 @@ sub get_result_schema {
         return;
     }
 
-    return $self->rschema_cache->get( join( ':', $args{'package'}, $args{'method'} ) );
+    return $self->rschema_cache->get( join( q{:}, $args{'package'}, $args{'method'} ) );
 }
 
 =head2 _get_result_schema 
@@ -236,7 +281,7 @@ sub get_result_schema {
 sub _get_result_schema {
     my ( $self, $key ) = @_;
 
-    if ( $key =~ /^(.*):([^:]+$)/x ) {
+    if ( $key =~ /^(.*):([^:]+$)/sx ) {
         return $self->_get_from_pod(
             package => $1,
             method  => $2,
@@ -263,7 +308,7 @@ sub get_path_to_module {
 
     if ( defined $INC{$module} ) {
         my $path = realpath( $INC{$module} );
-        $path =~ s/[^\/]+\.pm//x;
+        $path =~ s/[^\/]+\.pm//mx;
         return $path;
     }
     else {
