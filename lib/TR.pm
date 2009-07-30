@@ -1,6 +1,7 @@
 package TR;
 use TR::Standard;
 use English qw(-no_match_vars);
+use Data::Dumper;
 
 use vars qw($VERSION);
 use version; $VERSION = qv('1.1');
@@ -147,7 +148,7 @@ sub new {
         ## no critic (ProhibitImplicitNewlines)
         Log::Log4perl->init(
             \qq{
-      log4perl.rootLogger=ERROR, LOGFILE   
+      log4perl.rootLogger=INFO, LOGFILE   
 
       log4perl.appender.LOGFILE=Log::Log4perl::Appender::ScreenColoredLevels
       log4perl.appender.LOGFILE.mode=append
@@ -196,7 +197,12 @@ sub handler {
 
     eval {
         my $path = $self->context->request->rpc_path();
-        $self->log->info( $path . q{ } . $self->context->method() );
+        # Save params with the call.
+        $Data::Dumper::Indent = 0;
+        $Data::Dumper::Terse = 1;
+        my $params = Dumper($self->context->params);
+
+        $self->log->info( $path . q{ } . $self->context->method()  . q{ } . $params );
         $self->forward( $path );
         1;
     }
