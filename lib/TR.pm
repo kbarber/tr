@@ -4,7 +4,7 @@ use English qw(-no_match_vars);
 use Data::Dumper;
 
 use vars qw($VERSION);
-use version; $VERSION = qv('1.1');
+use version; $VERSION = qv('1.3');
 
 =head1 NAME
 
@@ -177,7 +177,7 @@ sub new {
                 'Don\'t know how to handle: ' . $request->content_type() );
         }
         1;
-    }
+        }
     or do {
         $self->_error_handler($EVAL_ERROR);
     };
@@ -198,11 +198,22 @@ sub handler {
     eval {
         my $path = $self->context->request->rpc_path();
         # Save params with the call.
-        $Data::Dumper::Indent = 0;
-        $Data::Dumper::Terse = 1;
-        my $params = Dumper($self->context->params);
 
-        $self->log->info( $path . q{ } . $self->context->method()  . q{ } . $params );
+        my $params_as_string =q{};
+        if ( my $params = $self->context->params ) {
+            my %scrubbed = %{$params}; # Take copy of params
+            # Censor any sensitive params here..
+            if ( $scrubbed{'password'} ) {
+                $scrubbed{'password'} = '********';
+            }
+
+            $Data::Dumper::Indent = 0;
+            $Data::Dumper::Terse = 1;
+
+            $params_as_string = Dumper(\%scrubbed);
+        }
+
+        $self->log->info( $path . q{ } . $self->context->method()  . q{ } . $params_as_string );
         $self->forward( $path );
         1;
     }
