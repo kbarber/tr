@@ -12,36 +12,24 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-  TR::Pod - Fetches schemas and documentation from modules.
+TR::Pod - Fetches schemas and documentation from modules.
             
 =head1 VERSION
 
-  See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION 
 
-    Finds and caches schema information from a module's Pod, also finds 
-    and returns documentation from a module's pod.
+Finds and caches schema information from a module's Pod, also finds 
+and returns documentation from a module's pod.
 
-    Is a singleton.
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+Is a singleton.
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -51,9 +39,9 @@ __PACKAGE__->mk_accessors(qw/schema_cache rschema_cache/);
 
 my $SINGLETON;
 
-=head2 new
+=item new
 
-  Init pod module
+Init pod module
 
 =cut
 
@@ -90,10 +78,10 @@ sub new {
     return $self;
 }
 
-=head2 _fetch 
+=item _fetch 
 
-  Returns PPI::Document object for a module if it's already been loaded, 
-  else loads up a PPI::Document object for the module.
+Returns PPI::Document object for a module if it's already been loaded, 
+else loads up a PPI::Document object for the module.
 
 =cut
 
@@ -108,14 +96,14 @@ sub _fetch {
     return $document;
 }
 
-=head2 get_documentation
+=item get_documentation
  
-  Grabs pod documentation for a given package/method.
-  Need to standardise on format so that it can be passed back
-  to a caller,
-  and that caller be able to present it any way it wants.
+Grabs pod documentation for a given package/method.
+Need to standardise on format so that it can be passed back
+to a caller,
+and that caller be able to present it any way it wants.
 
-  ie maybe pod like this:
+ie maybe pod like this:
 
   head2 asub
 
@@ -127,7 +115,7 @@ sub _fetch {
 
   cut
 
-  Could be returned as:
+Could be returned as:
 
   {
     method      => asub,
@@ -167,10 +155,10 @@ sub get_documentation {
     return;
 }
 
-=head2 _get_from_pod
+=item _get_from_pod
   
-  Looks for through pod for given "match" for method.
-  TODO: lots of overlap with get_documentation need to refactor
+Looks for through pod for given "match" for method.
+TODO: lots of overlap with get_documentation need to refactor
 
 =cut
 
@@ -211,9 +199,9 @@ sub _get_from_pod {
     return;
 }
 
-=head2 get_schema
+=item get_schema
  
-  Grab the schema for a method from cache
+Grab the schema for a method from cache
 
 =cut
 
@@ -228,9 +216,9 @@ sub get_schema {
     return $self->schema_cache->get( join( q{:}, $args{'package'}, $args{'method'} ) );
 }
 
-=head2 _get_schema 
+=item _get_schema 
 
-  Call on cache miss to fetch schema from perl module.
+Call on cache miss to fetch schema from perl module.
 
 =cut
 
@@ -248,9 +236,9 @@ sub _get_schema {
     return;
 }
 
-=head2 get_result_schema
+=item get_result_schema
  
-  Grab the result schema for a method.
+Grab the result schema for a method.
 
 =cut
 
@@ -265,9 +253,9 @@ sub get_result_schema {
     return $self->rschema_cache->get( join( q{:}, $args{'package'}, $args{'method'} ) );
 }
 
-=head2 _get_result_schema 
+=item _get_result_schema 
 
-  Call on cache miss to fetch result schema from perl module.
+Call on cache miss to fetch result schema from perl module.
 
 =cut
 
@@ -285,10 +273,9 @@ sub _get_result_schema {
     return;
 }
 
-=head2 get_path_to_module
+=item get_path_to_module
 
-  Grab the path to a module and return it's realpath (.. ie get rid 
-                                                      of /../../ etc)/.
+Grab the path to a module and return it's realpath (.. ie get rid of /../../ etc)/.
 
 =cut
 
@@ -311,9 +298,15 @@ sub get_path_to_module {
     return;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

@@ -8,11 +8,11 @@ use version; $VERSION = qv('1.3');
 
 =head1 NAME
 
-  TR - TR Engine
+TR - TR Engine
 
 =head1 VERSION
 
-  See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
@@ -28,33 +28,24 @@ use version; $VERSION = qv('1.3');
 
 =head1 DESCRIPTION 
 
-  The TR handles incoming requests and maps them to control
-  modules.
+The TR handles incoming requests and maps them to control
+modules.
 
-  See <TR::C::System> for an example of a control module.
+See <TR::C::System> for an example of a control module.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-  Can be run either as a script:
+Can be run either as a script:
+
   my $cgi = new CGI::Simple();
   my $app = new TR(config => 'config.file', request => $cgi);
   $app->handler();
 
-  Or mod_perl: See SYNOPSIS
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+Or mod_perl: See SYNOPSIS
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -98,15 +89,16 @@ __PACKAGE__->mk_accessors(
         log/
 );
 
-=head2 new
+=item new(&args)
 
-  Instantiate new object.  If no CGI or Apache::Request
-  object passed, will try and load CGI object.
+Instantiate new object.  If no CGI or Apache::Request
+object passed, will try and load CGI object.
 
-  Example:
-    PACKAGE->new();
-    PACKAGE->new(request => $cgi_object);
-    PACKAGE->new(request => $apache_request_object);
+Example:
+
+  TR->new();
+  TR->new(request => $cgi_object);
+  TR->new(request => $apache_request_object);
 
 =cut
 
@@ -181,7 +173,7 @@ sub new {
     return $self;
 }
 
-=head2 handler
+=item handler()
 
 =cut
 
@@ -221,10 +213,10 @@ sub handler {
     return;
 }
 
-=head2 forward
+=item forward($path, %args)
 
-  Takes a path and works out whether to handle it or pass it off to another 
-  module to handle.
+Takes a path and works out whether to handle it or pass it off to another 
+module to handle.
 
 =cut
 
@@ -252,9 +244,9 @@ sub forward {
     return;
 }
 
-=head2
+=item _get_controller(%args)
   
-  Returns a controller matching given type
+Returns a controller matching given type
 
 =cut
 
@@ -277,11 +269,11 @@ sub _get_controller {
     return;
 }
 
-=head2 _run_method 
+=item _run_method($method,%args) 
 
-  Called to run a method on the current object.
+Called to run a method on the current object.
 
-  Checks that it is a public method.
+Checks that it is a public method.
 
 =cut
 
@@ -354,9 +346,9 @@ sub _run_method {
     return;    # Should never get here.
 }
 
-=head2 _error_handler
+=item _error_handler($exception)
 
-  Handle errors in module.
+Handle errors in module.
 
 =cut
 
@@ -387,9 +379,15 @@ sub _error_handler {
     return;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
 

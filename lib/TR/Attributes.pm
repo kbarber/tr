@@ -5,49 +5,34 @@ use Attribute::Handlers;
 
 =head1 NAME
 
-    TR::Attributes - handles attributes for TR
+TR::Attributes - handles attributes for TR
 
 =head1 VERSION
 
-   See $TR::VERSION
+See $TR::VERSION
    
 =head1 SYNOPSIS
 
-  See <TR>
+See <TR>
 
 =head1 DESCRIPTION 
 
-  This module handles a list of attributes control modules can have.
-  It maintains a list of functions/attributes, and provides methods
-  to query whether a function handles a given path and is a public method.
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-  see <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+This module handles a list of attributes control modules can have.
+It maintains a list of functions/attributes, and provides methods
+to query whether a function handles a given path and is a public method.
 
 =head1 SUBROUTINES/METHODS
 
+=over 4
 
 =cut
 
 use base 'Class::Accessor::Fast';
 
-=head2 UNIVERSAL::Params
+=item UNIVERSAL::Params
 
-  Handles the Params attribute when given to methods
-  and checks parameters passed before running method.
+Handles the Params attribute when given to methods
+and checks parameters passed before running method.
 
 =cut
 
@@ -65,10 +50,10 @@ sub UNIVERSAL::Params : ATTR(CODE, BEGIN) {
     return;
 }
 
-=head2 UNIVERSAL::Local
+=item UNIVERSAL::Local
 
-  Handles the Local attribute given to methods and matches
-  paths to handle base on Module and method name.
+Handles the Local attribute given to methods and matches
+paths to handle base on Module and method name.
 
 =cut
 
@@ -81,10 +66,10 @@ sub UNIVERSAL::Local : ATTR(CODE, BEGIN) {
     return;
 }
 
-=head2 UNIVERSAL::Regex
+=item UNIVERSAL::Regex
 
-  Handles the Regex attribute given to methods and matches
-  paths to handle with a regex
+Handles the Regex attribute given to methods and matches
+paths to handle with a regex
 
 =cut
 
@@ -97,9 +82,9 @@ sub UNIVERSAL::Global : ATTR(CODE, BEGIN) {
     return;
 }
 
-=head2 _get_handler_paths
+=item _get_handler_paths
 
-  Returns list of handlers registered with attributes
+Returns list of handlers registered with attributes
 
 =cut
 
@@ -130,10 +115,10 @@ sub _get_handler_paths {
     return \%handlers;
 }
 
-=head2 _get_name_by_code_ref
+=item _get_name_by_code_ref
 
-  Resolves a code ref to sub name, a bit ugly but attributes pass
-  symbols and not method names in BEGIN.
+Resolves a code ref to sub name, a bit ugly but attributes pass
+symbols and not method names in BEGIN.
 
 =cut
 
@@ -156,9 +141,9 @@ sub _get_name_by_code_ref {
     return;
 }
 
-=head2 _is_public_method 
+=item _is_public_method 
 
-  Checks to see if a method is allowed.
+Checks to see if a method is allowed.
 
 =cut
 
@@ -189,9 +174,15 @@ sub _is_public_method {
     return;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

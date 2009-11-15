@@ -8,59 +8,45 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-    TR::Context::HTML - Handles HTML requests/responses for TR.
+TR::Context::HTML - Handles HTML requests/responses for TR.
 
 =head1 VERSION
 
-    See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    Used from within TR:
+Used from within TR:
 
-    use Module::Pluggable search_path => 'TR::Context',
-                          inner       => 0,
-                          sub_name    => 'context_handlers',
-                          instantiate => 'new';
+  use Module::Pluggable search_path => 'TR::Context',
+                        inner       => 0,
+                        sub_name    => 'context_handlers',
+                        instantiate => 'new';
 
-    foreach my $context ($self->context_handlers()) {
-        next unless $context->can('handles');
-        if ($context->handles(request => $request)) {
-            $self->context($context);
-            $context->init();
-        }
-    }
+  foreach my $context ($self->context_handlers()) {
+      next unless $context->can('handles');
+      if ($context->handles(request => $request)) {
+          $self->context($context);
+          $context->init();
+      }
+  }
 
-    my $method = $context->method;
-    my $params = $context->params;
+  my $method = $context->method;
+  my $params = $context->params;
 
 =head1 DESCRIPTION 
 
-    Handles requests of type 'Text/HTML' and returns
-    a response viewable in a browser.
+Handles requests of type 'Text/HTML' and returns
+a response viewable in a browser.
 
-    Not designed as a interface for applications to use,
-    designed to provide and interface for humans to see 
-    documentation, schemas, and to test/see reponses to
-    available methods.
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+Not designed as a interface for applications to use,
+designed to provide and interface for humans to see 
+documentation, schemas, and to test/see reponses to
+available methods.
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -70,9 +56,9 @@ use JSON::XS 2.2;
 use base 'TR::Context';
 __PACKAGE__->mk_accessors(qw/_params/);
 
-=head2 new
+=item new()
 
-    Creates new TR::Context::HTML object to handle html requests
+Creates new TR::Context::HTML object to handle html requests
 
 =cut
 
@@ -85,9 +71,9 @@ sub new {
     return $self;
 }
 
-=head2 method 
+=item method 
 
-    Grab the method from an html request
+Grab the method from an html request
 
 =cut
 
@@ -101,9 +87,9 @@ sub method {
     return;
 }
 
-=head2 set_params
+=item set_params
 
-    Sets a param
+Sets a param
 
 =cut
 
@@ -115,9 +101,9 @@ sub set_params {
     return;
 }
 
-=head2 params
+=item params
 
-    Grabs params from request
+Grabs params from request
 
 =cut
 
@@ -134,9 +120,9 @@ sub params {
     return $self->_params;
 }
 
-=head2 view
+=item view
 
-    Displays view
+Displays view
 
 =cut
 
@@ -188,9 +174,15 @@ sub view {
     return;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

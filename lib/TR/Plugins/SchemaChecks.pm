@@ -9,82 +9,67 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-    TR::Plugins::SchemaChecks - 
+TR::Plugins::SchemaChecks - 
 
 =head1 VERSION
 
-    See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    package TR::C::example;
-    use TR::Standard;
+  package TR::C::example;
+  use TR::Standard;
 
-    use base 'TR::C::System';
+  use base 'TR::C::System';
 
-    sub _init {
-        # Setup...
+  sub _init {
+    # Setup...
+  }
+
+  sub helloworld :Local {
+
+  =begin schema
+  {
+    "type": "map",
+    "required": true,
+    "mapping": {
+      "name": { "type":"str", "required": true }
     }
+  }
+  =cut
 
-    sub helloworld :Local {
+    my $self = shift;
+    my $params = $self->context->params;
+    my $name = $params->{'name'}
+    $self->context->result(message => "Hello $name");
 
-    =begin schema
-    {
-        "type": "map",
-        "required": true,
-        "mapping": {
-            "name": { "type":"str", "required": true }
-        }
+  =begin result_schema
+  {
+    "type": "map",
+    "required": true,
+    "mapping": {
+      "message": { "type": "str" }
     }
-    =cut
+  }
+  =cut
 
-        my $self = shift;
-        my $params = $self->context->params;
-        my $name = $params->{'name'}
-        $self->context->result(message => "Hello $name");
-
-    =begin result_schema
-    {
-        "type": "map",
-        "required": true,
-        "mapping": {
-            "message": { "type": "str" }
-        }
-    }
-    =cut
-
-    }
+  }
 
 =head1 DESCRIPTION 
 
-    Handles validation of incoming parameters 
-    and outgoing information using schemas defined within 
-    a function.  If no schema defined, no validation is
-    done.
+Handles validation of incoming parameters 
+and outgoing information using schemas defined within 
+a function.  If no schema defined, no validation is
+done.
 
-    Schemas defined are accessible via 'system.schema',
-    ie: 
+Schemas defined are accessible via 'system.schema',
+ie: 
 
-    http://some.server/tr/example?method=system.schema&show=helloworld
-
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+  http://some.server/tr/example?method=system.schema&show=helloworld
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -93,9 +78,9 @@ use JSON::XS qw(decode_json);
 
 use base 'Class::Accessor::Fast';
 
-=head2 pre_method_hook 
+=item pre_method_hook(%args)
 
-  Validates params with schema before method is run.
+Validates params with schema before method is run.
 
 =cut
 
@@ -124,9 +109,9 @@ sub pre_method_hook {
     return;
 }
 
-=head2 post_method_hook 
+=item post_method_hook(%args)
 
-  Validates result with schema (if given).
+Validates result with schema (if given).
 
 =cut
 
@@ -155,9 +140,15 @@ sub post_method_hook {
     return;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

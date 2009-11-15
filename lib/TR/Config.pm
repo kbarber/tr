@@ -8,37 +8,23 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-    TR::Config - Handle TR config file/s
+TR::Config - Handle TR config file/s
 
 =head1 VERSION
 
-    See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    See <TR>
+See <TR>
 
 =head1 DESCRIPTION 
 
-    Loads TR config file/s
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+Loads TR config file/s
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -47,6 +33,10 @@ use Config::Any::JSON;
 # use Config::Multi; Should split the config into multi files and use this
 
 my %INSTANCES;
+
+=item new
+
+=cut
 
 sub new {
     my ( $proto, $file ) = @_;
@@ -71,9 +61,15 @@ sub new {
     return $self;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+  
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

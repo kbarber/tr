@@ -7,31 +7,23 @@ use version; $VERSION = qv('1.0');
 
 =head1 NAME
 
-    TR::Test - Used for writing unit tests
+TR::Test - Used for writing unit tests
 
 =head1 VERSION
 
-  See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    use TR::Test;
+  use TR::Test;
 
 =head1 DESCRIPTION
 
-=head1 DIAGNOSTICS
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 BUGS AND LIMITATIONS
-
-=head1 AUTHOR
+Used for writing unit tests.
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -48,12 +40,12 @@ no warnings 'redefine';
 
 my $id = 0;
 
-=head2 json_test
+=item json_test()
 
-  Sub which does all the work of setting up the environment for a test.
+Sub which does all the work of setting up the environment for a test.
 
-  ie:
-  
+For example:
+
   my $response = json_test($app, uri => '/', method => 'testmethod', params => {..});
 
   my ($response, $time) = json_test($app, uri => '/', method => 'testmethod', params => {..});
@@ -128,9 +120,15 @@ sub json_test {
     return wantarray ? ( $response, $elapsed ) : $response;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

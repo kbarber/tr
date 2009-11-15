@@ -12,13 +12,15 @@ use Apache2::Const -compile => qw(OK);
 use TR;
 =head1 NAME
 
-  TR::ModPerl2 - mod_perl handler for TR.
+TR::ModPerl2 - mod_perl handler for TR.
 
 =head1 VERSION
 
-  See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
+
+Apache configuration:
 
   # Mod perl setup
   PerlSwitches -I/opt/tr/engine/lib -I/opt/tr/app
@@ -32,30 +34,15 @@ use TR;
 
 =head1 DESCRIPTION 
 
-  The mod_perl handler for <TR>
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-  # Mod perl setup
-  PerlSwitches -I/opt/tr/engine/lib -I/opt/tr/app
-  PerlSetVar config /etc/tr/registry.conf 
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
+The mod_perl handler for <TR>
 
 =head1 SUBROUTINES/METHODS
 
+=over 4
 
-=head2 handler
+=item handler
 
-    Creates the TR object and hands off control.
+Creates the TR object and hands off control.
 
 =cut
 
@@ -73,9 +60,15 @@ sub handler {
     return Apache2::Const::OK;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

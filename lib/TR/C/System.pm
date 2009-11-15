@@ -7,53 +7,39 @@ use version; $VERSION = qv('1.3');
 
 =head1 NAME
 
-    TR::C::System
+TR::C::System
 
 =head1 VERSION
 
-    See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    package TR::C::example;
-    use TR::Standard;
+  package TR::C::example;
+  use TR::Standard;
 
-    use base 'TR::C::System';
+  use base 'TR::C::System';
 
-    sub _init {
-        # Setup...
-    }
+  sub _init {
+    # Setup...
+  }
 
-    sub helloworld :Local {
-        my $self = shift;
-        my $params = $self->context->params;
-        $self->context->result('Hello world');
-    }
+  sub helloworld :Local {
+    my $self = shift;
+    my $params = $self->context->params;
+    $self->context->result('Hello world');
+  }
 
 =head1 DESCRIPTION 
 
-    Base TR:C module provides documentation/schema functions,
-    logging and config.
+Base TR:C module provides documentation/schema functions,
+logging and config.
 
-    All other Control modules should use this as base.
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-    Probably a few.
+All other Control modules should use this as base.
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -243,9 +229,13 @@ sub system_doc : Global {
     return;
 }
 
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

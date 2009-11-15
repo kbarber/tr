@@ -7,11 +7,11 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-  TR::Request - TR::Request object.
+TR::Request - TR::Request object.
 
 =head1 VERSION
 
-  See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
@@ -23,24 +23,12 @@ use version; $VERSION = qv('1.1');
 
 =head1 DESCRIPTION 
 
-  Wraps different request objects up to provide
-  one consistent interface to them.
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
+Wraps different request objects up to provide
+one consistent interface to them.
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -49,10 +37,10 @@ __PACKAGE__->mk_ro_accessors(qw/req/);
 
 # Abstract Request interfaces.
 
-=head2 new 
+=item new()
 
-  Stores the real request object is passed in - or creates a default 
-  CGI::Simple and stores that.
+Stores the real request object is passed in - or creates a default 
+CGI::Simple and stores that.
 
 =cut 
 
@@ -71,9 +59,9 @@ sub new {
     return $self;
 }
 
-=head2 content_type
+=item content_type()
 
-  Returns content type of request
+Returns content type of request
 
 =cut
 
@@ -92,9 +80,9 @@ sub content_type {
     return $content_type;
 }
 
-=head2 request_method
+=item request_method()
 
-  Returns whether it was a POST/GET
+Returns whether it was a POST/GET
 
 =cut
 
@@ -112,9 +100,9 @@ sub request_method {
     return $request_type;
 }
 
-=head2 request_time
+=item request_time()
 
-  Returns the request_time if possible.
+Returns the request_time if possible.
 
 =cut
 
@@ -134,9 +122,9 @@ sub request_time {
     return $request_time;
 }
 
-=head2 postdata
+=item postdata()
 
-  Returns raw POST data.
+Returns raw POST data.
 
 =cut
 
@@ -153,9 +141,9 @@ sub postdata {
     }
 }
 
-=head2 params
+=item params()
 
-  Returns hash array of params
+Returns hash array of params
 
 =cut
 
@@ -180,9 +168,9 @@ sub params {
     return;
 }
 
-=head2 param
+=item param(@args)
 
-  Return a single param, simple accessor.
+Return a single param, simple accessor.
 
 =cut
 
@@ -192,13 +180,15 @@ sub param {
     return $self->req->param(@args);
 }
 
-=head2 rpc_path 
+=item rpc_path()
 
-  Returns the part of the URI minus location,
-  ie http://server/t/foo/bar
+Returns the part of the URI minus location. For example:
 
-  will return
-  /foo/bar
+http://server/t/foo/bar
+
+will return
+
+/foo/bar
 
 =cut
 
@@ -213,9 +203,9 @@ sub rpc_path {
     return $uri;
 }
 
-=head2 location 
+=item location()
 
-  Returns the base location.
+Returns the base location.
 
 =cut
 
@@ -232,9 +222,9 @@ sub location {
     return q{};
 }
 
-=head2 uri
+=item uri()
 
-  Returns the URI
+Returns the URI
 
 =cut
 
@@ -251,9 +241,9 @@ sub uri {
     return;
 }
 
-=head2 server_name
+=item server_name()
 
-  Returns the servername
+Returns the servername
 
 =cut
 
@@ -270,9 +260,9 @@ sub server_name {
     return;
 }
 
-=head2 server_port
+=item server_port()
 
-  Returns the server port
+Returns the server port
 
 =cut
 
@@ -289,9 +279,9 @@ sub server_port {
     return;
 }
 
-=head2 protocol
+=item protocol()
 
-  Returns http or https
+Returns http or https
 
 =cut
 
@@ -308,9 +298,15 @@ sub protocol {
     return;
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

@@ -7,54 +7,40 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-    TR::Context::JSON - Module to handle JSON-RPC context.
+TR::Context::JSON - Module to handle JSON-RPC context.
 
 =head1 VERSION
 
-    See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    Used from within TR:
+Used from within TR:
 
-    use Module::Pluggable search_path => 'TR::Context',
-                          inner       => 0,
-                          sub_name    => 'context_handlers',
-                          instantiate => 'new';
+  use Module::Pluggable search_path => 'TR::Context',
+                        inner       => 0,
+                        sub_name    => 'context_handlers',
+                        instantiate => 'new';
 
-    foreach my $context ($self->context_handlers()) {
-        next unless $context->can('handles');
-        if ($context->handles(request => $request)) {
-            $self->context($context);
-            $context->init();
-        }
+  foreach my $context ($self->context_handlers()) {
+    next unless $context->can('handles');
+    if ($context->handles(request => $request)) {
+       $self->context($context);
+       $context->init();
     }
+  }
 
-    my $method = $context->method;
-    my $params = $context->params;
+  my $method = $context->method;
+  my $params = $context->params;
 
 =head1 DESCRIPTION 
 
-    TR::Context::JSON handles JSON-RPC calls to TR, and generates JSON-RPC
-    responses from the results of a TR call.
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+TR::Context::JSON handles JSON-RPC calls to TR, and generates JSON-RPC
+responses from the results of a TR call.
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
@@ -64,9 +50,9 @@ use JSON::XS 2.2;
 use base 'TR::Context';
 __PACKAGE__->mk_ro_accessors(qw/coder json_request/);
 
-=head2 new
+=item new()
 
-    Creates new TR::Context::JSON object
+Creates new TR::Context::JSON object
 
 =cut
 
@@ -79,9 +65,9 @@ sub new {
     return $self;
 }
 
-=head2 init
+=item init()
 
-    Basic JSON RPC setup stuff.
+Basic JSON RPC setup stuff.
 
 =cut
 
@@ -154,9 +140,9 @@ JSONRPC2
     return;
 }
 
-=head2 method 
+=item method()
 
-    Simple accessor to method called in JSON RPC.
+Simple accessor to method called in JSON RPC.
 
 =cut
 
@@ -172,9 +158,9 @@ sub method {
     return;
 }
 
-=head2 params
+=item params()
 
-    Simple accessor to params called in JSON RPC.
+Simple accessor to params called in JSON RPC.
 
 =cut
 
@@ -190,9 +176,9 @@ sub params {
     return;
 }
 
-=head2 set_params
+=item set_params(%params)
 
-    Work around for setting params for others.  TODO - do in a better way?
+Work around for setting params for others.  TODO - do in a better way?
 
 =cut
 
@@ -204,9 +190,9 @@ sub set_params {
     return;
 }
 
-=head2 retrieve_json_from_post
+=item retrieve_json_from_post()
 
-    Grabs POST data 
+Grabs POST data 
 
 =cut
 
@@ -220,9 +206,9 @@ sub retrieve_json_from_post {
     return;
 }
 
-=head2 retrieve_json_from_get
+=item retrieve_json_from_get()
 
-    Unimplemented
+Unimplemented
 
 =cut
 
@@ -233,9 +219,9 @@ sub retrieve_json_from_get {
     return;
 }
 
-=head2 view
+=item view()
 
-    Displays data
+Displays data
 
 =cut
 
@@ -268,8 +254,9 @@ sub view {
     return;
 }
 
-=head2 error_handler
+=item error_handler($exception)
 
+Handle error.
 
 =cut
 
@@ -279,9 +266,13 @@ sub error_handler {
     return;
 }
 
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     

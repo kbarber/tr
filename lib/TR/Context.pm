@@ -6,46 +6,32 @@ use version; $VERSION = qv('1.1');
 
 =head1 NAME
 
-    TR::Context - Base class for TR::Context::* modules.
+TR::Context - Base class for TR::Context::* modules.
 
 =head1 VERSION
 
-    See $VERSION
+See $VERSION
 
 =head1 SYNOPSIS
 
-    See <TR::Context::JSON>
+See <TR::Context::JSON>
 
 =head1 DESCRIPTION 
 
-    Basic methods etc for all TR::Context modules
-
-=head1 CONFIGURATION AND ENVIRONMENT
-
-    See <TR>
-
-=head1 DEPENDENCIES
-
-=head1 INCOMPATIBILITIES
-
-=head1 AUTHOR
-
-=head1 DIAGNOSTICS
-
-=head1 BUGS AND LIMITATIONS
-
-  Probably a few.
+Basic methods etc for all TR::Context modules
 
 =head1 SUBROUTINES/METHODS
+
+=over 4
 
 =cut
 
 use base 'Class::Accessor::Fast';
 __PACKAGE__->mk_accessors(qw/supported request/);
 
-=head2 handles
+=item handles
 
- Called by TR to see if this module handles the current contact type.
+Called by TR to see if this module handles the current contact type.
 
 =cut
 
@@ -72,10 +58,9 @@ sub handles {
     return;
 }
 
-=head2 result
+=item result
 
-  Results accessor:
-    Stores/merges results given or return results stored.
+Results accessor: Stores/merges results given or return results stored.
   
 =cut
 
@@ -99,9 +84,9 @@ sub result {
     return $self->{'result'};
 }
 
-=head2 _merge_hash
+=item _merge_hash
 
-  Simply and recursively merges any hashes.
+Simply and recursively merges any hashes.
 
 =cut 
 
@@ -125,9 +110,15 @@ sub _merge_hash {
 sub init {
 }
 
+=back
+
+=head1 AUTHOR
+
+Craig Knox
+
 =head1 LICENSE AND COPYRIGHT
 
-  Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
+Copyright (C) 2009 Alfresco Software Ltd <http://www.alfresco.com>
 
   This file is part of TR.
     
