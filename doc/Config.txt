@@ -1,0 +1,10 @@
+Example log4perl conf
+----------------------------------------------------------------------
+log4perl.rootLogger=ERROR, LOGFILE
+
+log4perl.appender.LOGFILE=Log::Log4perl::Appender::File
+log4perl.appender.LOGFILE.filename=/var/log/TR/error.log
+log4perl.appender.LOGFILE.mode=append
+
+log4perl.appender.LOGFILE.layout=PatternLayout
+log4perl.appender.LOGFILE.layout.ConversionPattern=[%d] %m%n
